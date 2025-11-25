@@ -105,6 +105,9 @@ def get_initial_data():
             'temperature': get_temperature_data(time_range),
             'runtime': get_runtime_data(time_range),
             'sankey': get_sankey_data(time_range),
+            'performance': get_performance_data(time_range),
+            'power': get_power_data(time_range),
+            'valve': get_valve_data(time_range),
             'config': {
                 'brand': provider.get_brand_name(),
                 'display_name': provider.get_display_name(),
@@ -248,6 +251,195 @@ def get_sankey_data(time_range):
         }
 
 
+def get_performance_data(time_range):
+    """Extract performance graph data (delta temperatures + compressor status)"""
+    try:
+        metrics = [
+            'brine_in_evaporator',
+            'brine_out_condenser',
+            'radiator_forward',
+            'radiator_return',
+            'compressor_status'
+        ]
+
+        df = data_query.query_metrics(metrics, time_range)
+
+        result = {
+            'brine_delta': [],
+            'radiator_delta': [],
+            'compressor_status': [],
+            'timestamps': []
+        }
+
+        if not df.empty:
+            # Calculate brine delta (ΔT)
+            brine_in = df[df['name'] == 'brine_in_evaporator']
+            brine_out = df[df['name'] == 'brine_out_condenser']
+
+            if not brine_in.empty and not brine_out.empty:
+                import pandas as pd
+                brine_delta = pd.merge(
+                    brine_in[['_time', '_value']],
+                    brine_out[['_time', '_value']],
+                    on='_time',
+                    suffixes=('_in', '_out')
+                )
+                brine_delta['delta'] = brine_delta['_value_in'] - brine_delta['_value_out']
+
+                result['brine_delta'] = [
+                    [row['_time'].isoformat(), float(row['delta'])]
+                    for _, row in brine_delta.iterrows()
+                ]
+
+            # Calculate radiator delta (ΔT)
+            rad_forward = df[df['name'] == 'radiator_forward']
+            rad_return = df[df['name'] == 'radiator_return']
+
+            if not rad_forward.empty and not rad_return.empty:
+                import pandas as pd
+                rad_delta = pd.merge(
+                    rad_forward[['_time', '_value']],
+                    rad_return[['_time', '_value']],
+                    on='_time',
+                    suffixes=('_fwd', '_ret')
+                )
+                rad_delta['delta'] = rad_delta['_value_fwd'] - rad_delta['_value_ret']
+
+                result['radiator_delta'] = [
+                    [row['_time'].isoformat(), float(row['delta'])]
+                    for _, row in rad_delta.iterrows()
+                ]
+
+            # Get compressor status
+            comp = df[df['name'] == 'compressor_status']
+            if not comp.empty:
+                result['compressor_status'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in comp.iterrows()
+                ]
+                result['timestamps'] = comp['_time'].astype(str).tolist()
+
+        return result
+    except Exception as e:
+        logger.error(f"Error getting performance data: {e}")
+        return {
+            'brine_delta': [],
+            'radiator_delta': [],
+            'compressor_status': [],
+            'timestamps': []
+        }
+
+
+def get_power_data(time_range):
+    """Extract power graph data (power consumption + system status)"""
+    try:
+        metrics = [
+            'power_consumption',
+            'compressor_status',
+            'additional_heat_percent'
+        ]
+
+        df = data_query.query_metrics(metrics, time_range)
+
+        result = {
+            'power_consumption': [],
+            'compressor_status': [],
+            'additional_heat_percent': [],
+            'timestamps': []
+        }
+
+        if not df.empty:
+            # Get power consumption
+            power = df[df['name'] == 'power_consumption']
+            if not power.empty:
+                result['power_consumption'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in power.iterrows()
+                ]
+                result['timestamps'] = power['_time'].astype(str).tolist()
+
+            # Get compressor status
+            comp = df[df['name'] == 'compressor_status']
+            if not comp.empty:
+                result['compressor_status'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in comp.iterrows()
+                ]
+
+            # Get auxiliary heater percentage
+            heater = df[df['name'] == 'additional_heat_percent']
+            if not heater.empty:
+                result['additional_heat_percent'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in heater.iterrows()
+                ]
+
+        return result
+    except Exception as e:
+        logger.error(f"Error getting power data: {e}")
+        return {
+            'power_consumption': [],
+            'compressor_status': [],
+            'additional_heat_percent': [],
+            'timestamps': []
+        }
+
+
+def get_valve_data(time_range):
+    """Extract valve status graph data (valve + compressor + hot water temp)"""
+    try:
+        metrics = [
+            'switch_valve_status',
+            'compressor_status',
+            'hot_water_top'
+        ]
+
+        df = data_query.query_metrics(metrics, time_range)
+
+        result = {
+            'valve_status': [],
+            'compressor_status': [],
+            'hot_water_temp': [],
+            'timestamps': []
+        }
+
+        if not df.empty:
+            # Get valve status
+            valve = df[df['name'] == 'switch_valve_status']
+            if not valve.empty:
+                result['valve_status'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in valve.iterrows()
+                ]
+                result['timestamps'] = valve['_time'].astype(str).tolist()
+
+            # Get compressor status
+            comp = df[df['name'] == 'compressor_status']
+            if not comp.empty:
+                result['compressor_status'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in comp.iterrows()
+                ]
+
+            # Get hot water temperature
+            hw_temp = df[df['name'] == 'hot_water_top']
+            if not hw_temp.empty:
+                result['hot_water_temp'] = [
+                    [row['_time'].isoformat(), float(row['_value'])]
+                    for _, row in hw_temp.iterrows()
+                ]
+
+        return result
+    except Exception as e:
+        logger.error(f"Error getting valve data: {e}")
+        return {
+            'valve_status': [],
+            'compressor_status': [],
+            'hot_water_temp': [],
+            'timestamps': []
+        }
+
+
 # ==================== WebSocket Handlers ====================
 
 @socketio.on('connect')
@@ -301,6 +493,9 @@ def handle_time_range_change(data):
             'temperature': get_temperature_data(time_range),
             'runtime': get_runtime_data(time_range),
             'sankey': get_sankey_data(time_range),
+            'performance': get_performance_data(time_range),
+            'power': get_power_data(time_range),
+            'valve': get_valve_data(time_range),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -326,6 +521,9 @@ def handle_manual_update(data):
             'temperature': get_temperature_data(time_range),
             'runtime': get_runtime_data(time_range),
             'sankey': get_sankey_data(time_range),
+            'performance': get_performance_data(time_range),
+            'power': get_power_data(time_range),
+            'valve': get_valve_data(time_range),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -362,6 +560,9 @@ def background_updates():
                 'temperature': get_temperature_data(time_range),
                 'runtime': get_runtime_data(time_range),
                 'sankey': get_sankey_data(time_range),
+                'performance': get_performance_data(time_range),
+                'power': get_power_data(time_range),
+                'valve': get_valve_data(time_range),
                 'timestamp': datetime.now().isoformat()
             }
 
