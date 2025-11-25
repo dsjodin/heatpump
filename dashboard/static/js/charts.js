@@ -19,21 +19,39 @@ function initializeCharts(data) {
         dashboardConfig = data.config;
     }
 
-    // Initialize each chart instance
-    charts.cop = echarts.init(document.getElementById('cop-chart'));
-    charts.temperature = echarts.init(document.getElementById('temperature-chart'));
-    charts.runtime = echarts.init(document.getElementById('runtime-chart'));
-    charts.sankey = echarts.init(document.getElementById('sankey-chart'));
-    charts.performance = echarts.init(document.getElementById('performance-chart'));
-    charts.power = echarts.init(document.getElementById('power-chart'));
-    charts.valve = echarts.init(document.getElementById('valve-chart'));
+    // Initialize each chart instance with loading animation
+    const chartIds = ['cop-chart', 'temperature-chart', 'runtime-chart', 'sankey-chart',
+                      'performance-chart', 'power-chart', 'valve-chart'];
+    const chartKeys = ['cop', 'temperature', 'runtime', 'sankey', 'performance', 'power', 'valve'];
+
+    chartKeys.forEach((key, index) => {
+        const element = document.getElementById(chartIds[index]);
+        if (element) {
+            charts[key] = echarts.init(element);
+            // Show loading animation
+            charts[key].showLoading('default', {
+                text: 'Laddar data...',
+                color: '#ff8c42',
+                textColor: '#666',
+                maskColor: 'rgba(255, 255, 255, 0.8)',
+                zlevel: 0
+            });
+        }
+    });
 
     // Update all charts with initial data
     updateAllCharts(data);
 
+    // Hide loading animations
+    Object.values(charts).forEach(chart => {
+        if (chart) chart.hideLoading();
+    });
+
     // Make charts responsive
     window.addEventListener('resize', () => {
-        Object.values(charts).forEach(chart => chart.resize());
+        Object.values(charts).forEach(chart => {
+            if (chart) chart.resize();
+        });
     });
 
     console.log('✅ All charts initialized');

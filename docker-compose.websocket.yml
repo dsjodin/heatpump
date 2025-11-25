@@ -1,0 +1,68 @@
+# Docker Compose for Heat Pump Dashboard - WebSocket Version
+# Flask + Socket.IO + ECharts implementation
+
+version: '3.8'
+
+services:
+  # New WebSocket Dashboard (Flask + ECharts)
+  dashboard-websocket:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    container_name: heatpump-dashboard-websocket
+    ports:
+      - "8050:8050"
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-thermia}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-heatpump}
+      - HEATPUMP_BRAND=${HEATPUMP_BRAND:-thermia}
+      - SECRET_KEY=${SECRET_KEY:-heatpump-dashboard-secret-key-change-in-production}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      # Mount shared modules
+      - ./dashboard_dash/data_query.py:/app/data_query.py:ro
+      - ./dashboard_dash/config_colors.py:/app/config_colors.py:ro
+      - ./providers:/app/providers:ro
+      # Mount config
+      - ./config.yaml:/app/config.yaml:ro
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+    networks:
+      - heatpump-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8050/api/config', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # InfluxDB (if not already running)
+  influxdb:
+    image: influxdb:2.7
+    container_name: heatpump-influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USERNAME:-admin}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD:-changeme123}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUXDB_ORG:-thermia}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUXDB_BUCKET:-heatpump}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUXDB_TOKEN}
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    restart: unless-stopped
+    networks:
+      - heatpump-network
+
+networks:
+  heatpump-network:
+    driver: bridge
+
+volumes:
+  influxdb-data:
+  influxdb-config:
