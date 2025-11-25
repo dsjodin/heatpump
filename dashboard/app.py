@@ -115,6 +115,8 @@ def get_initial_data():
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
+            'status': get_status_data(),
+            'events': get_event_log(20),
             'config': {
                 'brand': provider.get_brand_name(),
                 'display_name': provider.get_display_name(),
@@ -447,6 +449,73 @@ def get_valve_data(time_range):
         }
 
 
+def get_status_data():
+    """Get current system status including alarm, compressor, and current metrics"""
+    try:
+        # Get alarm status
+        alarm = data_query.get_alarm_status()
+
+        # Get current metrics for status display
+        current_metrics = data_query.get_latest_values()
+
+        # Calculate current COP if possible
+        current_cop = None
+        try:
+            cop_data = data_query.get_cop('1h')  # Get last hour for current COP
+            if cop_data and len(cop_data) > 0:
+                current_cop = round(cop_data[-1], 2) if cop_data[-1] is not None else None
+        except:
+            pass
+
+        status = {
+            'alarm': {
+                'is_active': alarm.get('is_alarm', False),
+                'code': alarm.get('alarm_code'),
+                'description': alarm.get('alarm_description'),
+                'time': alarm['alarm_time'].isoformat() if alarm.get('alarm_time') else None
+            },
+            'current': {
+                'outdoor_temp': round(current_metrics.get('outdoor_temp', 0), 1) if current_metrics.get('outdoor_temp') is not None else None,
+                'indoor_temp': round(current_metrics.get('indoor_temp', 0), 1) if current_metrics.get('indoor_temp') is not None else None,
+                'hot_water': round(current_metrics.get('hot_water_top', 0), 1) if current_metrics.get('hot_water_top') is not None else None,
+                'compressor_running': bool(current_metrics.get('compressor_status', 0)),
+                'brine_temp': round(current_metrics.get('brine_in_evaporator', 0), 1) if current_metrics.get('brine_in_evaporator') is not None else None,
+                'radiator_temp': round(current_metrics.get('radiator_forward', 0), 1) if current_metrics.get('radiator_forward') is not None else None,
+                'current_cop': current_cop
+            },
+            'timestamp': datetime.now().isoformat()
+        }
+
+        return status
+    except Exception as e:
+        logger.error(f"Error getting status data: {e}")
+        return {
+            'alarm': {'is_active': False, 'code': None, 'description': None, 'time': None},
+            'current': {},
+            'timestamp': datetime.now().isoformat()
+        }
+
+
+def get_event_log(limit=20):
+    """Get recent event log entries"""
+    try:
+        events = data_query.get_event_log(limit=limit)
+
+        event_list = []
+        for event in events:
+            event_list.append({
+                'time': event.get('time', '').isoformat() if hasattr(event.get('time', ''), 'isoformat') else str(event.get('time', '')),
+                'type': event.get('type', 'unknown'),
+                'description': event.get('description', 'No description'),
+                'value': event.get('value')
+            })
+
+        return event_list
+    except Exception as e:
+        logger.error(f"Error getting event log: {e}")
+        return []
+
+
 # ==================== WebSocket Handlers ====================
 
 @socketio.on('connect')
@@ -503,6 +572,8 @@ def handle_time_range_change(data):
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
+            'status': get_status_data(),
+            'events': get_event_log(20),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -531,6 +602,8 @@ def handle_manual_update(data):
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
+            'status': get_status_data(),
+            'events': get_event_log(20),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -570,6 +643,8 @@ def background_updates():
                 'performance': get_performance_data(time_range),
                 'power': get_power_data(time_range),
                 'valve': get_valve_data(time_range),
+                'status': get_status_data(),
+                'events': get_event_log(20),
                 'timestamp': datetime.now().isoformat()
             }
 

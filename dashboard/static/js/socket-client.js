@@ -57,6 +57,16 @@ socket.on('graph_update', (data) => {
         window.updateKPIs(data);
     }
 
+    // Update alarm status
+    if (data.status) {
+        updateAlarmStatus(data.status);
+    }
+
+    // Update event log
+    if (data.events) {
+        updateEventLog(data.events);
+    }
+
     // Update last update time
     updateLastUpdateTime();
 });
@@ -88,6 +98,16 @@ async function loadInitialData(timeRange) {
         // Update KPIs
         if (window.updateKPIs) {
             window.updateKPIs(data);
+        }
+
+        // Update alarm status
+        if (data.status) {
+            updateAlarmStatus(data.status);
+        }
+
+        // Update event log
+        if (data.events) {
+            updateEventLog(data.events);
         }
 
         updateLastUpdateTime();
@@ -157,6 +177,130 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ==================== Status Update Functions ====================
+
+function updateAlarmStatus(status) {
+    const alarmCard = document.getElementById('alarm-card');
+    const alarmContent = document.getElementById('alarm-content');
+
+    if (!status || !status.alarm) {
+        return;
+    }
+
+    const alarm = status.alarm;
+
+    if (alarm.is_active) {
+        // ALARM ACTIVE
+        alarmCard.className = 'chart-card alarm-active';
+
+        let alarmTime = 'Okänd';
+        let duration = '';
+
+        if (alarm.time) {
+            try {
+                const alarmDate = new Date(alarm.time);
+                alarmTime = alarmDate.toLocaleString('sv-SE');
+
+                const now = new Date();
+                const durationMs = now - alarmDate;
+                const hours = Math.floor(durationMs / (1000 * 60 * 60));
+                const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+
+                if (hours > 0) {
+                    duration = `${hours}h ${minutes}min`;
+                } else {
+                    duration = `${minutes}min`;
+                }
+            } catch (e) {
+                console.error('Error parsing alarm time:', e);
+            }
+        }
+
+        alarmContent.innerHTML = `
+            <div class="text-center alarm-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h4 class="text-danger text-center mb-3">⚠️ LARM AKTIVT!</h4>
+            <div class="alarm-description mb-2">
+                <strong>Larmkod ${alarm.code || 'N/A'}: </strong>
+                <span>${alarm.description || 'Okänd beskrivning'}</span>
+            </div>
+            <hr>
+            <div class="alarm-details">
+                <div class="mb-2">
+                    <i class="fas fa-clock me-2"></i>
+                    <strong>Aktiverad: </strong>
+                    <span>${alarmTime}</span>
+                </div>
+                ${duration ? `
+                <div>
+                    <i class="fas fa-hourglass-half me-2"></i>
+                    <strong>Varaktighet: </strong>
+                    <span>${duration}</span>
+                </div>
+                ` : ''}
+            </div>
+            <hr>
+            <div class="mt-3">
+                <i class="fas fa-info-circle me-2"></i>
+                <span class="text-muted">Kontrollera värmepumpen och återställ larmet efter åtgärd.</span>
+            </div>
+        `;
+    } else {
+        // NO ALARM
+        alarmCard.className = 'chart-card alarm-ok';
+        alarmContent.innerHTML = `
+            <div class="text-center alarm-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <h5 class="text-success text-center mb-2">✅ Inget aktivt larm</h5>
+            <p class="text-muted text-center mb-0">Systemet fungerar normalt</p>
+        `;
+    }
+}
+
+function updateEventLog(events) {
+    const eventLog = document.getElementById('event-log');
+
+    if (!events || events.length === 0) {
+        eventLog.innerHTML = '<div class="text-center text-muted p-3">Inga händelser att visa</div>';
+        return;
+    }
+
+    let html = '';
+    events.forEach(event => {
+        const eventType = event.type || 'info';
+        let eventTime = 'Okänd tid';
+
+        try {
+            if (event.time) {
+                const date = new Date(event.time);
+                eventTime = date.toLocaleString('sv-SE', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        } catch (e) {
+            console.error('Error parsing event time:', e);
+        }
+
+        html += `
+            <div class="event-item">
+                <div class="d-flex justify-content-between align-items-start">
+                    <span class="event-time">${eventTime}</span>
+                    <span class="event-type ${eventType}">${eventType}</span>
+                </div>
+                <div class="event-description">${event.description || 'No description'}</div>
+                ${event.value ? `<div class="event-value">Värde: ${event.value}</div>` : ''}
+            </div>
+        `;
+    });
+
+    eventLog.innerHTML = html;
+}
 
 // ==================== Helper Functions ====================
 
