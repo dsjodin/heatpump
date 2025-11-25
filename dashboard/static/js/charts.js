@@ -515,12 +515,13 @@ function updateValveChart(data) {
 // ==================== KPI Updates ====================
 
 function updateKPIs(data) {
+    // Basic KPIs (existing)
     // COP
     if (data.cop && data.cop.avg) {
         document.getElementById('kpi-cop').textContent = data.cop.avg.toFixed(2);
     }
 
-    // Compressor runtime
+    // Compressor runtime (from runtime data)
     if (data.runtime && data.runtime.compressor_percent !== undefined) {
         document.getElementById('kpi-compressor').textContent = `${data.runtime.compressor_percent.toFixed(0)}%`;
     }
@@ -540,6 +541,34 @@ function updateKPIs(data) {
         if (temps.length > 0) {
             const latest = temps[temps.length - 1];
             document.getElementById('kpi-hot-water').textContent = `${latest.toFixed(0)}°C`;
+        }
+    }
+
+    // Extended KPIs (new)
+    if (data.kpi) {
+        // Energy Cost & Consumption
+        if (data.kpi.energy) {
+            const energy = data.kpi.energy;
+            document.getElementById('kpi-energy-cost').textContent = `${energy.total_cost.toFixed(0)} kr`;
+            document.getElementById('kpi-energy-kwh').textContent = `${energy.total_kwh.toFixed(1)} kWh`;
+        }
+
+        // Compressor Runtime Stats
+        if (data.kpi.runtime) {
+            const runtime = data.kpi.runtime;
+            document.getElementById('kpi-comp-runtime').textContent = `${runtime.compressor_percent.toFixed(0)}%`;
+            document.getElementById('kpi-comp-hours').textContent = `${runtime.compressor_hours.toFixed(1)} timmar`;
+
+            // Aux Heater Runtime
+            document.getElementById('kpi-aux-runtime').textContent = `${runtime.aux_heater_percent.toFixed(0)}%`;
+            document.getElementById('kpi-aux-hours').textContent = `${runtime.aux_heater_hours.toFixed(1)} timmar`;
+        }
+
+        // Hot Water Cycles
+        if (data.kpi.hot_water) {
+            const hw = data.kpi.hot_water;
+            document.getElementById('kpi-hw-cycles').textContent = hw.total_cycles;
+            document.getElementById('kpi-hw-cycles-per-day').textContent = `${hw.cycles_per_day.toFixed(1)} /dag`;
         }
     }
 }

@@ -117,6 +117,7 @@ def get_initial_data():
             'valve': get_valve_data(time_range),
             'status': get_status_data(),
             'events': get_event_log(20),
+            'kpi': get_kpi_data(time_range),
             'config': {
                 'brand': provider.get_brand_name(),
                 'display_name': provider.get_display_name(),
@@ -516,6 +517,51 @@ def get_event_log(limit=20):
         return []
 
 
+def get_kpi_data(time_range='24h', price_per_kwh=2.0):
+    """Get extended KPI metrics (energy, runtime, hot water)"""
+    try:
+        # Calculate energy costs
+        energy_costs = data_query.calculate_energy_costs(time_range, price_per_kwh)
+
+        # Calculate runtime statistics
+        runtime_stats = data_query.calculate_runtime_stats(time_range)
+
+        # Analyze hot water cycles (use longer period for meaningful stats)
+        hw_time_range = '7d' if time_range in ['1h', '6h', '24h'] else time_range
+        hot_water_stats = data_query.analyze_hot_water_cycles(hw_time_range)
+
+        kpi = {
+            'energy': {
+                'total_kwh': energy_costs.get('total_kwh', 0),
+                'total_cost': energy_costs.get('total_cost', 0),
+                'avg_power': energy_costs.get('avg_power', 0),
+                'peak_power': energy_costs.get('peak_power', 0)
+            },
+            'runtime': {
+                'compressor_hours': runtime_stats.get('compressor_runtime_hours', 0),
+                'compressor_percent': runtime_stats.get('compressor_runtime_percent', 0),
+                'aux_heater_hours': runtime_stats.get('aux_heater_runtime_hours', 0),
+                'aux_heater_percent': runtime_stats.get('aux_heater_runtime_percent', 0),
+                'total_hours': runtime_stats.get('total_hours', 0)
+            },
+            'hot_water': {
+                'total_cycles': hot_water_stats.get('total_cycles', 0),
+                'cycles_per_day': hot_water_stats.get('cycles_per_day', 0),
+                'avg_duration_minutes': hot_water_stats.get('avg_cycle_duration_minutes', 0),
+                'avg_energy_kwh': hot_water_stats.get('avg_energy_per_cycle_kwh', 0)
+            }
+        }
+
+        return kpi
+    except Exception as e:
+        logger.error(f"Error getting KPI data: {e}")
+        return {
+            'energy': {'total_kwh': 0, 'total_cost': 0, 'avg_power': 0, 'peak_power': 0},
+            'runtime': {'compressor_hours': 0, 'compressor_percent': 0, 'aux_heater_hours': 0, 'aux_heater_percent': 0, 'total_hours': 0},
+            'hot_water': {'total_cycles': 0, 'cycles_per_day': 0, 'avg_duration_minutes': 0, 'avg_energy_kwh': 0}
+        }
+
+
 # ==================== WebSocket Handlers ====================
 
 @socketio.on('connect')
@@ -574,6 +620,7 @@ def handle_time_range_change(data):
             'valve': get_valve_data(time_range),
             'status': get_status_data(),
             'events': get_event_log(20),
+            'kpi': get_kpi_data(time_range),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -604,6 +651,7 @@ def handle_manual_update(data):
             'valve': get_valve_data(time_range),
             'status': get_status_data(),
             'events': get_event_log(20),
+            'kpi': get_kpi_data(time_range),
             'timestamp': datetime.now().isoformat()
         }
 
@@ -645,6 +693,7 @@ def background_updates():
                 'valve': get_valve_data(time_range),
                 'status': get_status_data(),
                 'events': get_event_log(20),
+                'kpi': get_kpi_data(time_range),
                 'timestamp': datetime.now().isoformat()
             }
 
