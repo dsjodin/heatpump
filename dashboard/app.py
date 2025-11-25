@@ -115,7 +115,7 @@ def get_initial_data():
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
-            'status': get_status_data(),
+            'status': get_status_data(time_range),
             'events': get_event_log(20),
             'kpi': get_kpi_data(time_range),
             'config': {
@@ -450,14 +450,17 @@ def get_valve_data(time_range):
         }
 
 
-def get_status_data():
-    """Get current system status including alarm, compressor, and current metrics"""
+def get_status_data(time_range='24h'):
+    """Get current system status including alarm, compressor, current metrics, and min/max values"""
     try:
         # Get alarm status
         alarm = data_query.get_alarm_status()
 
         # Get current metrics for status display
         current_metrics = data_query.get_latest_values()
+
+        # Get min/max values for the time range
+        min_max = data_query.get_min_max_values(time_range)
 
         # Calculate current COP if possible
         current_cop = None
@@ -468,6 +471,21 @@ def get_status_data():
         except:
             pass
 
+        def get_value_with_minmax(metric_name):
+            """Helper to get current value with min/max"""
+            current = current_metrics.get(metric_name)
+            current_val = round(current, 1) if current is not None else None
+
+            mm = min_max.get(metric_name, {})
+            min_val = round(mm.get('min'), 1) if mm.get('min') is not None else None
+            max_val = round(mm.get('max'), 1) if mm.get('max') is not None else None
+
+            return {
+                'current': current_val,
+                'min': min_val,
+                'max': max_val
+            }
+
         status = {
             'alarm': {
                 'is_active': alarm.get('is_alarm', False),
@@ -476,12 +494,16 @@ def get_status_data():
                 'time': alarm['alarm_time'].isoformat() if alarm.get('alarm_time') else None
             },
             'current': {
-                'outdoor_temp': round(current_metrics.get('outdoor_temp', 0), 1) if current_metrics.get('outdoor_temp') is not None else None,
-                'indoor_temp': round(current_metrics.get('indoor_temp', 0), 1) if current_metrics.get('indoor_temp') is not None else None,
-                'hot_water': round(current_metrics.get('hot_water_top', 0), 1) if current_metrics.get('hot_water_top') is not None else None,
+                'outdoor_temp': get_value_with_minmax('outdoor_temp'),
+                'indoor_temp': get_value_with_minmax('indoor_temp'),
+                'hot_water': get_value_with_minmax('hot_water_top'),
+                'brine_in': get_value_with_minmax('brine_in_evaporator'),
+                'brine_out': get_value_with_minmax('brine_out_condenser'),
+                'radiator_forward': get_value_with_minmax('radiator_forward'),
+                'radiator_return': get_value_with_minmax('radiator_return'),
+                'power': round(current_metrics.get('power_consumption', 0), 0) if current_metrics.get('power_consumption') is not None else None,
                 'compressor_running': bool(current_metrics.get('compressor_status', 0)),
-                'brine_temp': round(current_metrics.get('brine_in_evaporator', 0), 1) if current_metrics.get('brine_in_evaporator') is not None else None,
-                'radiator_temp': round(current_metrics.get('radiator_forward', 0), 1) if current_metrics.get('radiator_forward') is not None else None,
+                'aux_heater': current_metrics.get('additional_heat_percent', 0) > 0 if current_metrics.get('additional_heat_percent') is not None else False,
                 'current_cop': current_cop
             },
             'timestamp': datetime.now().isoformat()
@@ -618,7 +640,7 @@ def handle_time_range_change(data):
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
-            'status': get_status_data(),
+            'status': get_status_data(time_range),
             'events': get_event_log(20),
             'kpi': get_kpi_data(time_range),
             'timestamp': datetime.now().isoformat()
@@ -649,7 +671,7 @@ def handle_manual_update(data):
             'performance': get_performance_data(time_range),
             'power': get_power_data(time_range),
             'valve': get_valve_data(time_range),
-            'status': get_status_data(),
+            'status': get_status_data(time_range),
             'events': get_event_log(20),
             'kpi': get_kpi_data(time_range),
             'timestamp': datetime.now().isoformat()
@@ -691,7 +713,7 @@ def background_updates():
                 'performance': get_performance_data(time_range),
                 'power': get_power_data(time_range),
                 'valve': get_valve_data(time_range),
-                'status': get_status_data(),
+                'status': get_status_data(time_range),
                 'events': get_event_log(20),
                 'kpi': get_kpi_data(time_range),
                 'timestamp': datetime.now().isoformat()

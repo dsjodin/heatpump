@@ -337,3 +337,227 @@ body {
     font-size: 0.85rem;
     font-style: italic;
 }
+
+/* ==================== Sticky Topbar Quick Stats ==================== */
+.topbar-quickstats {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 2px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 1020;
+}
+
+.topbar-stat {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.topbar-icon {
+    color: #666;
+    font-size: 1rem;
+}
+
+.topbar-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.topbar-value {
+    color: #212529;
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.topbar-cop {
+    color: #51cf66;
+}
+
+.topbar-status {
+    font-size: 0.85rem;
+}
+
+/* ==================== Status Badges ==================== */
+.status-badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    background: #e9ecef;
+    color: #495057;
+    border: none;
+}
+
+.status-badge i {
+    font-size: 0.9rem;
+}
+
+.status-badge.status-on {
+    background: #51cf66;
+    color: white;
+}
+
+.status-badge.status-off {
+    background: #adb5bd;
+    color: white;
+}
+
+.status-badge.status-alarm {
+    background: #ff6b6b;
+    color: white;
+    animation: pulse-alarm 1.5s infinite;
+}
+
+@keyframes pulse-alarm {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* ==================== Secondary Temperature Cards ==================== */
+.temp-card-secondary {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    border-left: 4px solid #dee2e6;
+    transition: all 0.3s ease;
+}
+
+.temp-card-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.15);
+}
+
+.temp-card-secondary .card-body {
+    padding: 1rem;
+}
+
+.secondary-icon {
+    font-size: 1.5rem;
+}
+
+.secondary-title {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 600;
+}
+
+.secondary-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.25rem;
+}
+
+.minmax-text {
+    font-size: 0.75rem;
+    display: block;
+    color: #868e96;
+}
+
+/* ==================== Hot Water Stats ==================== */
+.hw-stat-box {
+    padding: 1rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    transition: all 0.3s ease;
+}
+
+.hw-stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.hw-stat-icon {
+    font-size: 2rem;
+    color: #4dabf7;
+    margin-bottom: 0.5rem;
+}
+
+.hw-stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #212529;
+    margin: 0;
+}
+
+/* ==================== System Schema ==================== */
+.schema-container {
+    background: #f8f9fa;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.schema-background {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.schema-placeholder {
+    background: #f8f9fa;
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+}
+
+.schema-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.schema-temp-label {
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transform: translate(-50%, -50%);
+}
+
+.schema-temp-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #212529;
+    display: block;
+}
+
+.schema-temp-name {
+    font-size: 0.75rem;
+    color: #666;
+    text-transform: uppercase;
+    display: block;
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 768px) {
+    .topbar-quickstats {
+        font-size: 0.85rem;
+    }
+
+    .topbar-value {
+        font-size: 0.9rem;
+    }
+
+    .secondary-value {
+        font-size: 1.4rem;
+    }
+
+    .hw-stat-value {
+        font-size: 1.5rem;
+    }
+
+    .schema-temp-label {
+        padding: 0.3rem 0.5rem;
+    }
+
+    .schema-temp-value {
+        font-size: 1rem;
+    }
+}

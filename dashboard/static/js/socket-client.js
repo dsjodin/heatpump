@@ -67,6 +67,13 @@ socket.on('graph_update', (data) => {
         updateEventLog(data.events);
     }
 
+    // Update all new UI elements
+    updateTopbarQuickStats(data);
+    updateStatusBadges(data);
+    updateSecondaryTemps(data);
+    updateHotWaterSection(data);
+    updateSchemaTemps(data);
+
     // Update last update time
     updateLastUpdateTime();
 });
@@ -109,6 +116,13 @@ async function loadInitialData(timeRange) {
         if (data.events) {
             updateEventLog(data.events);
         }
+
+        // Update all new UI elements
+        updateTopbarQuickStats(data);
+        updateStatusBadges(data);
+        updateSecondaryTemps(data);
+        updateHotWaterSection(data);
+        updateSchemaTemps(data);
 
         updateLastUpdateTime();
 
@@ -171,6 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (connected) {
                 socket.emit('request_update', { range: currentTimeRange });
+            } else {
+                loadInitialData(currentTimeRange);
+            }
+        });
+    }
+
+    // Price input change - update KPI calculations
+    const priceInput = document.getElementById('price-input');
+    if (priceInput) {
+        priceInput.addEventListener('change', () => {
+            console.log(`💰 Price changed to: ${priceInput.value} kr/kWh`);
+            // Trigger a manual refresh to recalculate with new price
+            if (connected) {
+                socket.emit('request_update', { range: currentTimeRange, price: parseFloat(priceInput.value) });
             } else {
                 loadInitialData(currentTimeRange);
             }
@@ -300,6 +328,164 @@ function updateEventLog(events) {
     });
 
     eventLog.innerHTML = html;
+}
+
+function updateTopbarQuickStats(data) {
+    if (!data.status || !data.status.current) return;
+
+    const current = data.status.current;
+
+    // Update topbar temperatures
+    if (current.outdoor_temp && current.outdoor_temp.current !== null) {
+        document.getElementById('topbar-outdoor').textContent = `${current.outdoor_temp.current.toFixed(1)}°C`;
+    }
+    if (current.indoor_temp && current.indoor_temp.current !== null) {
+        document.getElementById('topbar-indoor').textContent = `${current.indoor_temp.current.toFixed(1)}°C`;
+    }
+    if (current.hot_water && current.hot_water.current !== null) {
+        document.getElementById('topbar-hotwater').textContent = `${current.hot_water.current.toFixed(0)}°C`;
+    }
+
+    // Update COP
+    if (current.current_cop !== null) {
+        document.getElementById('topbar-cop').textContent = current.current_cop.toFixed(2);
+    }
+
+    // Update power
+    if (current.power !== null) {
+        document.getElementById('topbar-power').textContent = `${current.power} W`;
+    }
+
+    // Update status
+    const statusIcon = document.getElementById('topbar-status-icon');
+    const statusText = document.getElementById('topbar-status');
+
+    if (data.status.alarm && data.status.alarm.is_active) {
+        statusIcon.className = 'fas fa-exclamation-triangle me-2 topbar-icon text-danger';
+        statusText.textContent = 'LARM!';
+        statusText.className = 'topbar-value text-danger fw-bold';
+    } else if (current.compressor_running) {
+        statusIcon.className = 'fas fa-cog fa-spin me-2 topbar-icon text-success';
+        statusText.textContent = 'Kompressor PÅ';
+        statusText.className = 'topbar-value text-success';
+    } else {
+        statusIcon.className = 'fas fa-check-circle me-2 topbar-icon';
+        statusText.textContent = 'Standby';
+        statusText.className = 'topbar-value';
+    }
+}
+
+function updateStatusBadges(data) {
+    if (!data.status || !data.status.current) return;
+
+    const current = data.status.current;
+
+    // Compressor status
+    const compBadge = document.getElementById('status-compressor');
+    const compText = document.getElementById('status-comp-text');
+    if (current.compressor_running) {
+        compBadge.className = 'badge status-badge status-on';
+        compText.textContent = 'PÅ';
+    } else {
+        compBadge.className = 'badge status-badge status-off';
+        compText.textContent = 'AV';
+    }
+
+    // Aux heater status
+    const auxBadge = document.getElementById('status-aux');
+    const auxText = document.getElementById('status-aux-text');
+    if (current.aux_heater) {
+        auxBadge.className = 'badge status-badge status-on';
+        auxText.textContent = 'PÅ';
+    } else {
+        auxBadge.className = 'badge status-badge status-off';
+        auxText.textContent = 'AV';
+    }
+
+    // Alarm status
+    const alarmBadge = document.getElementById('status-alarm-badge');
+    const alarmText = document.getElementById('status-alarm-text');
+    if (data.status.alarm && data.status.alarm.is_active) {
+        alarmBadge.className = 'badge status-badge status-alarm';
+        alarmText.textContent = 'Aktivt!';
+    } else {
+        alarmBadge.className = 'badge status-badge status-off';
+        alarmText.textContent = 'Inget';
+    }
+
+    // Hot water status (assume heating if compressor on and valve switched)
+    const hwBadge = document.getElementById('status-hotwater');
+    const hwText = document.getElementById('status-hw-text');
+    // Simplified logic - could be enhanced
+    if (current.compressor_running) {
+        hwBadge.className = 'badge status-badge status-on';
+        hwText.textContent = 'Värmer';
+    } else {
+        hwBadge.className = 'badge status-badge';
+        hwText.textContent = 'Standby';
+    }
+}
+
+function updateSecondaryTemps(data) {
+    if (!data.status || !data.status.current) return;
+
+    const current = data.status.current;
+
+    // Helper to update temp card
+    function updateTempCard(id, tempData) {
+        if (!tempData) return;
+
+        const tempEl = document.getElementById(`${id}-temp`);
+        const minmaxEl = document.getElementById(`${id}-minmax`);
+
+        if (tempData.current !== null) {
+            tempEl.textContent = `${tempData.current.toFixed(1)}°C`;
+        }
+
+        if (tempData.min !== null && tempData.max !== null) {
+            minmaxEl.textContent = `Min: ${tempData.min.toFixed(1)}°C | Max: ${tempData.max.toFixed(1)}°C`;
+        }
+    }
+
+    updateTempCard('brine-in', current.brine_in);
+    updateTempCard('brine-out', current.brine_out);
+    updateTempCard('radiator-forward', current.radiator_forward);
+    updateTempCard('radiator-return', current.radiator_return);
+}
+
+function updateHotWaterSection(data) {
+    if (!data.kpi || !data.kpi.hot_water) return;
+
+    const hw = data.kpi.hot_water;
+
+    document.getElementById('hw-total-cycles').textContent = hw.total_cycles;
+    document.getElementById('hw-cycles-per-day').textContent = hw.cycles_per_day.toFixed(1);
+    document.getElementById('hw-avg-duration').textContent = `${hw.avg_duration_minutes.toFixed(0)} min`;
+    document.getElementById('hw-avg-energy').textContent = `${hw.avg_energy_kwh.toFixed(1)} kWh`;
+}
+
+function updateSchemaTemps(data) {
+    if (!data.status || !data.status.current) return;
+
+    const current = data.status.current;
+
+    // Update schema temperature overlays
+    function updateSchemaTemp(id, tempData) {
+        const el = document.getElementById(`schema-${id}`);
+        if (!el) return;
+
+        const valueSpan = el.querySelector('.schema-temp-value');
+        if (valueSpan && tempData && tempData.current !== null) {
+            valueSpan.textContent = `${tempData.current.toFixed(1)}°C`;
+        }
+    }
+
+    updateSchemaTemp('outdoor', current.outdoor_temp);
+    updateSchemaTemp('brine-in', current.brine_in);
+    updateSchemaTemp('brine-out', current.brine_out);
+    updateSchemaTemp('rad-forward', current.radiator_forward);
+    updateSchemaTemp('rad-return', current.radiator_return);
+    updateSchemaTemp('hotwater', current.hot_water);
 }
 
 // ==================== Helper Functions ====================

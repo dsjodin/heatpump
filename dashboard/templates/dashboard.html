@@ -34,6 +34,54 @@
         </div>
     </nav>
 
+    <!-- Sticky Topbar Quick Stats -->
+    <div class="topbar-quickstats sticky-top">
+        <div class="container-fluid px-4">
+            <div class="row g-2 py-2">
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i class="fas fa-cloud-sun me-2 topbar-icon"></i>
+                        <span class="topbar-label">Ute: </span>
+                        <span id="topbar-outdoor" class="topbar-value">--°C</span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i class="fas fa-home me-2 topbar-icon"></i>
+                        <span class="topbar-label">Inne: </span>
+                        <span id="topbar-indoor" class="topbar-value">--°C</span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i class="fas fa-tint me-2 topbar-icon"></i>
+                        <span class="topbar-label">VV: </span>
+                        <span id="topbar-hotwater" class="topbar-value">--°C</span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i class="fas fa-chart-line me-2 topbar-icon"></i>
+                        <span class="topbar-label">COP: </span>
+                        <span id="topbar-cop" class="topbar-value topbar-cop">--</span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i class="fas fa-bolt me-2 topbar-icon"></i>
+                        <span id="topbar-power" class="topbar-value">-- W</span>
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-2">
+                    <div class="topbar-stat">
+                        <i id="topbar-status-icon" class="fas fa-info-circle me-2 topbar-icon"></i>
+                        <span id="topbar-status" class="topbar-value topbar-status">--</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="container-fluid px-4 py-3">
         <!-- Controls Section -->
         <div class="row mb-3">
@@ -52,7 +100,13 @@
                                 <option value="30d">Senaste månad</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <label for="price-input" class="form-label fw-bold mb-1">
+                                <i class="fas fa-coins"></i> Elpris (kr/kWh)
+                            </label>
+                            <input type="number" id="price-input" class="form-control form-control-sm" value="2.0" min="0" max="10" step="0.1">
+                        </div>
+                        <div class="col-md-2">
                             <label class="form-label fw-bold mb-1">
                                 <i class="fas fa-sync-alt"></i> Uppdatering
                             </label>
@@ -62,7 +116,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="col-md-6 text-md-end">
+                        <div class="col-md-5 text-md-end">
                             <div class="update-time">
                                 <i class="fas fa-info-circle"></i> Auto-uppdatering var 30:e sekund
                             </div>
@@ -98,6 +152,85 @@
                         <div class="text-center text-muted p-3">
                             <i class="fas fa-spinner fa-spin"></i> Laddar händelser...
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-info-circle"></i> Systemstatus
+                    </div>
+                    <div class="chart-body p-3">
+                        <div id="status-indicators" class="d-flex flex-wrap gap-2">
+                            <span class="badge status-badge" id="status-compressor">
+                                <i class="fas fa-cog me-1"></i> Kompressor: <span id="status-comp-text">--</span>
+                            </span>
+                            <span class="badge status-badge" id="status-aux">
+                                <i class="fas fa-fire me-1"></i> Tillsatsvärme: <span id="status-aux-text">--</span>
+                            </span>
+                            <span class="badge status-badge" id="status-alarm-badge">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Larm: <span id="status-alarm-text">Inget</span>
+                            </span>
+                            <span class="badge status-badge" id="status-hotwater">
+                                <i class="fas fa-bath me-1"></i> Varmvatten: <span id="status-hw-text">--</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Secondary Temperature Cards -->
+        <div class="row mb-4">
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                <div class="temp-card-secondary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-snowflake me-2 secondary-icon text-info"></i>
+                            <h6 class="mb-0 secondary-title">KB In (Köldbärare)</h6>
+                        </div>
+                        <h4 class="mb-1 secondary-value" id="brine-in-temp">--°C</h4>
+                        <small class="text-muted minmax-text" id="brine-in-minmax">--</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                <div class="temp-card-secondary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-snowflake me-2 secondary-icon text-primary"></i>
+                            <h6 class="mb-0 secondary-title">KB Ut</h6>
+                        </div>
+                        <h4 class="mb-1 secondary-value" id="brine-out-temp">--°C</h4>
+                        <small class="text-muted minmax-text" id="brine-out-minmax">--</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                <div class="temp-card-secondary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-arrow-right me-2 secondary-icon text-danger"></i>
+                            <h6 class="mb-0 secondary-title">Radiator Fram</h6>
+                        </div>
+                        <h4 class="mb-1 secondary-value" id="radiator-forward-temp">--°C</h4>
+                        <small class="text-muted minmax-text" id="radiator-forward-minmax">--</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+                <div class="temp-card-secondary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-arrow-left me-2 secondary-icon text-warning"></i>
+                            <h6 class="mb-0 secondary-title">Radiator Retur</h6>
+                        </div>
+                        <h4 class="mb-1 secondary-value" id="radiator-return-temp">--°C</h4>
+                        <small class="text-muted minmax-text" id="radiator-return-minmax">--</small>
                     </div>
                 </div>
             </div>
@@ -300,6 +433,109 @@
                     </div>
                     <div class="chart-body">
                         <div id="valve-chart" class="chart-container" style="height: 700px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hot Water Analysis Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-bath"></i> Varmvattencykler - Detaljerad Analys
+                    </div>
+                    <div class="chart-body p-4">
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="hw-stat-box">
+                                    <i class="fas fa-sync-alt hw-stat-icon"></i>
+                                    <h6 class="text-muted mb-2">Totalt Cykler</h6>
+                                    <h3 class="hw-stat-value" id="hw-total-cycles">--</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="hw-stat-box">
+                                    <i class="fas fa-calendar-day hw-stat-icon"></i>
+                                    <h6 class="text-muted mb-2">Cykler/Dag</h6>
+                                    <h3 class="hw-stat-value" id="hw-cycles-per-day">--</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="hw-stat-box">
+                                    <i class="fas fa-hourglass-half hw-stat-icon"></i>
+                                    <h6 class="text-muted mb-2">Medel Varaktighet</h6>
+                                    <h3 class="hw-stat-value" id="hw-avg-duration">-- min</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="hw-stat-box">
+                                    <i class="fas fa-battery-half hw-stat-icon"></i>
+                                    <h6 class="text-muted mb-2">Medel Energi</h6>
+                                    <h3 class="hw-stat-value" id="hw-avg-energy">-- kWh</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Schema Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <i class="fas fa-project-diagram"></i> Live Systemschema
+                    </div>
+                    <div class="chart-body p-3">
+                        <p class="text-muted mb-3">
+                            <i class="fas fa-info-circle"></i> Visar värmepumpens aktuella driftläge med riktiga temperaturvärden och animationer
+                        </p>
+                        <div class="schema-container" style="position: relative; min-height: 500px;">
+                            <!-- Background Image (will be added by user) -->
+                            <img src="{{ url_for('static', filename='assets/schema/BV_main2.png') }}"
+                                 id="schema-background"
+                                 class="schema-background"
+                                 alt="Heat Pump System Schema"
+                                 onerror="this.style.display='none'; document.getElementById('schema-placeholder').style.display='block';">
+
+                            <!-- Placeholder if image not found -->
+                            <div id="schema-placeholder" class="schema-placeholder text-center" style="display: none; padding: 100px;">
+                                <i class="fas fa-image fa-5x text-muted mb-3"></i>
+                                <h5 class="text-muted">System Schema Placeholder</h5>
+                                <p class="text-muted">Place BV_main2.png in dashboard/static/assets/schema/ to display system diagram</p>
+                            </div>
+
+                            <!-- Temperature Overlays (positioned absolutely over schema) -->
+                            <div class="schema-overlay">
+                                <!-- These will be positioned based on the schema image -->
+                                <div class="schema-temp-label" id="schema-outdoor" style="position: absolute; top: 50px; left: 50px;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">Ute</span>
+                                </div>
+                                <div class="schema-temp-label" id="schema-brine-in" style="position: absolute; top: 150px; left: 100px;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">KB In</span>
+                                </div>
+                                <div class="schema-temp-label" id="schema-brine-out" style="position: absolute; top: 150px; right: 100px;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">KB Ut</span>
+                                </div>
+                                <div class="schema-temp-label" id="schema-rad-forward" style="position: absolute; bottom: 150px; left: 100px;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">Fram</span>
+                                </div>
+                                <div class="schema-temp-label" id="schema-rad-return" style="position: absolute; bottom: 150px; right: 100px;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">Retur</span>
+                                </div>
+                                <div class="schema-temp-label" id="schema-hotwater" style="position: absolute; bottom: 50px; left: 50%;">
+                                    <span class="schema-temp-value">--°C</span>
+                                    <span class="schema-temp-name">Varmvatten</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
