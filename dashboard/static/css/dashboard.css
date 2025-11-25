@@ -1,0 +1,231 @@
+/*
+ * Thermia Heat Pump Dashboard - WebSocket Version
+ * Modern design with heat pump themed colors
+ */
+
+/* Import Font Awesome */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* ==================== Global Styles ==================== */
+:root {
+    /* Heat Pump Theme Colors */
+    --color-hot: #ff6b6b;
+    --color-warm: #ff8c42;
+    --color-cold: #4dabf7;
+    --color-cool: #339af0;
+    --color-success: #51cf66;
+    --color-warning: #ffd43b;
+    --color-danger: #ff6b6b;
+    --color-info: #74c0fc;
+
+    /* Neutrals */
+    --color-bg: #f8f9fa;
+    --color-card: #ffffff;
+    --color-text: #212529;
+    --color-text-muted: #6c757d;
+    --color-border: #dee2e6;
+
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--color-text);
+    min-height: 100vh;
+}
+
+/* ==================== Header ==================== */
+.navbar {
+    box-shadow: var(--shadow-md);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.connection-badge {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    animation: pulse 2s infinite;
+}
+
+.connection-badge.connected {
+    background-color: #28a745 !important;
+}
+
+.connection-badge.disconnected {
+    background-color: #dc3545 !important;
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ==================== Controls ==================== */
+.controls-section {
+    background: white;
+    padding: 1.2rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+}
+
+.update-time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+
+/* ==================== KPI Cards ==================== */
+.kpi-card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+}
+
+.kpi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.kpi-success {
+    background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+    color: white;
+}
+
+.kpi-primary {
+    background: linear-gradient(135deg, #339af0 0%, #228be6 100%);
+    color: white;
+}
+
+.kpi-info {
+    background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%);
+    color: white;
+}
+
+.kpi-warning {
+    background: linear-gradient(135deg, #ffd43b 0%, #fcc419 100%);
+    color: #212529;
+}
+
+.kpi-icon {
+    font-size: 2rem;
+    opacity: 0.9;
+}
+
+.kpi-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.kpi-subtitle {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin-top: 0.3rem;
+}
+
+/* ==================== Chart Cards ==================== */
+.chart-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.chart-header {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8c42 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.chart-body {
+    padding: 1.5rem;
+}
+
+.chart-container {
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Plotly/ECharts container styling */
+[id$="-chart"] {
+    border-radius: 8px;
+}
+
+/* ==================== Loading States ==================== */
+.chart-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+    color: var(--color-text-muted);
+}
+
+.loading-spinner {
+    border: 4px solid var(--color-border);
+    border-top: 4px solid var(--color-warm);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 768px) {
+    .kpi-value {
+        font-size: 1.8rem;
+    }
+
+    .kpi-icon {
+        font-size: 1.5rem;
+    }
+
+    .chart-card {
+        margin-bottom: 1rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+}
+
+/* ==================== Additional Utilities ==================== */
+.text-gradient {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8c42 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.card-hover:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.transition-all {
+    transition: all 0.3s ease;
+}

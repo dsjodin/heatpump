@@ -77,6 +77,13 @@ connected_clients = {}
 @app.route('/')
 def index():
     """Serve main dashboard page"""
+    return render_template('dashboard.html',
+                         brand_name=provider.get_display_name(),
+                         dashboard_title=provider.get_dashboard_title())
+
+@app.route('/test')
+def test():
+    """Serve test dashboard page"""
     return render_template('index.html',
                          brand_name=provider.get_display_name(),
                          dashboard_title=provider.get_dashboard_title())
