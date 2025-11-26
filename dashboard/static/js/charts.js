@@ -9,6 +9,22 @@ const charts = {};
 // Store dashboard configuration
 let dashboardConfig = null;
 
+// ==================== Helper Functions ====================
+
+/**
+ * Safely format a number with toFixed, handling null/undefined values
+ * @param {number|null|undefined} value - The value to format
+ * @param {number} decimals - Number of decimal places
+ * @param {string} fallback - Fallback string for null values
+ * @returns {string} Formatted number or fallback
+ */
+function safeFixed(value, decimals = 1, fallback = '--') {
+    if (value === null || value === undefined || isNaN(value)) {
+        return fallback;
+    }
+    return value.toFixed(decimals);
+}
+
 // ==================== Chart Initialization ====================
 
 function initializeCharts(data) {
@@ -123,10 +139,10 @@ function updateCopChart(data) {
                 },
                 label: {
                     position: 'end',
-                    formatter: `Medel: ${data.avg.toFixed(2)}`
+                    formatter: `Medel: ${safeFixed(data.avg, 2)}`
                 },
                 data: [{
-                    yAxis: data.avg
+                    yAxis: data.avg !== null ? data.avg : 0
                 }]
             }
         }],
@@ -139,8 +155,8 @@ function updateCopChart(data) {
             formatter: (params) => {
                 const date = new Date(params[0].value[0]);
                 const time = date.toLocaleTimeString('sv-SE');
-                const value = params[0].value[1].toFixed(2);
-                return `${time}<br/>COP: <b>${value}</b>`;
+                const value = params[0].value[1];
+                return `${time}<br/>COP: <b>${safeFixed(value, 2)}</b>`;
             }
         },
         backgroundColor: 'transparent'
@@ -279,7 +295,7 @@ function updateSankeyChart(data) {
 
     const option = {
         title: {
-            text: `Energiflöde (COP: ${data.cop.toFixed(2)}, ${data.free_energy_percent.toFixed(0)}% gratis från mark)`,
+            text: `Energiflöde (COP: ${safeFixed(data.cop, 2)}, ${safeFixed(data.free_energy_percent, 0)}% gratis från mark)`,
             textStyle: { fontSize: 14, color: '#666' },
             left: 'center',
             top: 10
@@ -311,7 +327,7 @@ function updateSankeyChart(data) {
             trigger: 'item',
             formatter: (params) => {
                 if (params.dataType === 'edge') {
-                    return `${params.data.source} → ${params.data.target}<br/>Energi: ${params.value.toFixed(0)}`;
+                    return `${params.data.source} → ${params.data.target}<br/>Energi: ${safeFixed(params.value, 0)}`;
                 } else {
                     return `${params.name}`;
                 }
@@ -517,13 +533,13 @@ function updateValveChart(data) {
 function updateKPIs(data) {
     // Basic KPIs (existing)
     // COP
-    if (data.cop && data.cop.avg) {
-        document.getElementById('kpi-cop').textContent = data.cop.avg.toFixed(2);
+    if (data.cop && data.cop.avg !== undefined) {
+        document.getElementById('kpi-cop').textContent = safeFixed(data.cop.avg, 2);
     }
 
     // Compressor runtime (from runtime data)
     if (data.runtime && data.runtime.compressor_percent !== undefined) {
-        document.getElementById('kpi-compressor').textContent = `${data.runtime.compressor_percent.toFixed(0)}%`;
+        document.getElementById('kpi-compressor').textContent = `${safeFixed(data.runtime.compressor_percent, 0)}%`;
     }
 
     // Indoor temperature (latest value from temperature data)
@@ -531,7 +547,7 @@ function updateKPIs(data) {
         const temps = data.temperature.indoor_temp;
         if (temps.length > 0) {
             const latest = temps[temps.length - 1];
-            document.getElementById('kpi-indoor').textContent = `${latest.toFixed(1)}°C`;
+            document.getElementById('kpi-indoor').textContent = `${safeFixed(latest, 1)}°C`;
         }
     }
 
@@ -540,7 +556,7 @@ function updateKPIs(data) {
         const temps = data.temperature.hot_water_top;
         if (temps.length > 0) {
             const latest = temps[temps.length - 1];
-            document.getElementById('kpi-hot-water').textContent = `${latest.toFixed(0)}°C`;
+            document.getElementById('kpi-hot-water').textContent = `${safeFixed(latest, 0)}°C`;
         }
     }
 
@@ -549,26 +565,26 @@ function updateKPIs(data) {
         // Energy Cost & Consumption
         if (data.kpi.energy) {
             const energy = data.kpi.energy;
-            document.getElementById('kpi-energy-cost').textContent = `${energy.total_cost.toFixed(0)} kr`;
-            document.getElementById('kpi-energy-kwh').textContent = `${energy.total_kwh.toFixed(1)} kWh`;
+            document.getElementById('kpi-energy-cost').textContent = `${safeFixed(energy.total_cost, 0)} kr`;
+            document.getElementById('kpi-energy-kwh').textContent = `${safeFixed(energy.total_kwh, 1)} kWh`;
         }
 
         // Compressor Runtime Stats
         if (data.kpi.runtime) {
             const runtime = data.kpi.runtime;
-            document.getElementById('kpi-comp-runtime').textContent = `${runtime.compressor_percent.toFixed(0)}%`;
-            document.getElementById('kpi-comp-hours').textContent = `${runtime.compressor_hours.toFixed(1)} timmar`;
+            document.getElementById('kpi-comp-runtime').textContent = `${safeFixed(runtime.compressor_percent, 0)}%`;
+            document.getElementById('kpi-comp-hours').textContent = `${safeFixed(runtime.compressor_hours, 1)} timmar`;
 
             // Aux Heater Runtime
-            document.getElementById('kpi-aux-runtime').textContent = `${runtime.aux_heater_percent.toFixed(0)}%`;
-            document.getElementById('kpi-aux-hours').textContent = `${runtime.aux_heater_hours.toFixed(1)} timmar`;
+            document.getElementById('kpi-aux-runtime').textContent = `${safeFixed(runtime.aux_heater_percent, 0)}%`;
+            document.getElementById('kpi-aux-hours').textContent = `${safeFixed(runtime.aux_heater_hours, 1)} timmar`;
         }
 
         // Hot Water Cycles
         if (data.kpi.hot_water) {
             const hw = data.kpi.hot_water;
-            document.getElementById('kpi-hw-cycles').textContent = hw.total_cycles;
-            document.getElementById('kpi-hw-cycles-per-day').textContent = `${hw.cycles_per_day.toFixed(1)} /dag`;
+            document.getElementById('kpi-hw-cycles').textContent = hw.total_cycles || '--';
+            document.getElementById('kpi-hw-cycles-per-day').textContent = `${safeFixed(hw.cycles_per_day, 1)} /dag`;
         }
     }
 }
