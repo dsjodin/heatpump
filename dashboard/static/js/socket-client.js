@@ -315,13 +315,16 @@ function updateEventLog(events) {
             console.error('Error parsing event time:', e);
         }
 
+        const icon = event.icon || '';
+        const description = event.description || 'No description';
+
         html += `
             <div class="event-item">
                 <div class="d-flex justify-content-between align-items-start">
                     <span class="event-time">${eventTime}</span>
                     <span class="event-type ${eventType}">${eventType}</span>
                 </div>
-                <div class="event-description">${event.description || 'No description'}</div>
+                <div class="event-description">${icon} ${description}</div>
                 ${event.value ? `<div class="event-value">Värde: ${event.value}</div>` : ''}
             </div>
         `;

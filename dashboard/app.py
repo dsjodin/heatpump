@@ -553,8 +553,9 @@ def get_event_log(limit=20):
             event_list.append({
                 'time': event.get('time', '').isoformat() if hasattr(event.get('time', ''), 'isoformat') else str(event.get('time', '')),
                 'type': event.get('type', 'unknown'),
-                'description': event.get('description', 'No description'),
-                'value': event.get('value')
+                'description': event.get('event', 'No description'),  # 'event' key contains the description
+                'value': event.get('value'),
+                'icon': event.get('icon', '')
             })
 
         return event_list
