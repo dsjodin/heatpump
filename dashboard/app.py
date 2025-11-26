@@ -474,7 +474,11 @@ def get_status_data(time_range='24h'):
         def get_value_with_minmax(metric_name):
             """Helper to get current value with min/max"""
             current = current_metrics.get(metric_name)
-            current_val = round(current, 1) if current is not None else None
+            # current_metrics returns {'value': ..., 'unit': ..., 'time': ...}
+            if isinstance(current, dict):
+                current_val = round(current.get('value'), 1) if current.get('value') is not None else None
+            else:
+                current_val = round(current, 1) if current is not None else None
 
             mm = min_max.get(metric_name, {})
             min_val = round(mm.get('min'), 1) if mm.get('min') is not None else None
@@ -501,9 +505,9 @@ def get_status_data(time_range='24h'):
                 'brine_out': get_value_with_minmax('brine_out_condenser'),
                 'radiator_forward': get_value_with_minmax('radiator_forward'),
                 'radiator_return': get_value_with_minmax('radiator_return'),
-                'power': round(current_metrics.get('power_consumption', 0), 0) if current_metrics.get('power_consumption') is not None else None,
-                'compressor_running': bool(current_metrics.get('compressor_status', 0)),
-                'aux_heater': current_metrics.get('additional_heat_percent', 0) > 0 if current_metrics.get('additional_heat_percent') is not None else False,
+                'power': round(current_metrics.get('power_consumption', {}).get('value', 0), 0) if current_metrics.get('power_consumption', {}).get('value') is not None else None,
+                'compressor_running': bool(current_metrics.get('compressor_status', {}).get('value', 0)),
+                'aux_heater': current_metrics.get('additional_heat_percent', {}).get('value', 0) > 0 if current_metrics.get('additional_heat_percent', {}).get('value') is not None else False,
                 'current_cop': current_cop
             },
             'timestamp': datetime.now().isoformat()
