@@ -350,8 +350,11 @@ function updateTopbarQuickStats(data) {
     }
 
     // Update COP
-    if (current.current_cop !== null) {
-        document.getElementById('topbar-cop').textContent = current.current_cop.toFixed(2);
+    const topbarCop = document.getElementById('topbar-cop');
+    if (current.current_cop !== null && current.current_cop !== undefined && !isNaN(current.current_cop)) {
+        topbarCop.textContent = current.current_cop.toFixed(2);
+    } else {
+        topbarCop.textContent = '--';
     }
 
     // Update power

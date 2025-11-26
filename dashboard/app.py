@@ -485,10 +485,14 @@ def get_status_data(time_range='24h'):
         # Calculate current COP if possible
         current_cop = None
         try:
-            cop_data = data_query.get_cop('1h')  # Get last hour for current COP
-            if cop_data and len(cop_data) > 0:
-                current_cop = round(cop_data[-1], 2) if cop_data[-1] is not None else None
-        except:
+            cop_df = data_query.calculate_cop('1h')  # Get last hour for current COP
+            if not cop_df.empty and 'estimated_cop' in cop_df.columns:
+                # Get the most recent non-null COP value
+                cop_values = cop_df['estimated_cop'].dropna()
+                if len(cop_values) > 0:
+                    current_cop = round(cop_values.iloc[-1], 2)
+        except Exception as e:
+            logger.debug(f"Could not calculate current COP: {e}")
             pass
 
         def get_value_with_minmax(metric_name):
