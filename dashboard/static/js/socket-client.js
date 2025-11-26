@@ -514,14 +514,14 @@ function updateSchemaTemps(data) {
         komp.style.display = current.compressor_running ? 'block' : 'none';
     }
 
-    // Show/hide brine pump rotation
-    if (kb_pump && current.compressor_running !== undefined) {
-        kb_pump.style.display = current.compressor_running ? 'block' : 'none';
+    // Show/hide brine pump rotation - use real pump status
+    if (kb_pump && current.brine_pump_running !== undefined) {
+        kb_pump.style.display = current.brine_pump_running ? 'block' : 'none';
     }
 
-    // Show/hide radiator pump rotation
-    if (rad_pump && current.compressor_running !== undefined) {
-        rad_pump.style.display = current.compressor_running ? 'block' : 'none';
+    // Show/hide radiator pump rotation - use real pump status
+    if (rad_pump && current.radiator_pump_running !== undefined) {
+        rad_pump.style.display = current.radiator_pump_running ? 'block' : 'none';
     }
 
     // Change aux heater image based on status
@@ -537,11 +537,17 @@ function updateSchemaTemps(data) {
         radiator.style.display = current.radiator_forward.current > 30 ? 'block' : 'none';
     }
 
-    // Valve arrows (would need switch_valve_status in status data to work properly)
-    // For now, leave them hidden as we don't have this data yet
-    if (valve_rad) valve_rad.style.display = 'none';
-    if (valve_vv) valve_vv.style.display = 'none';
-    if (vv_hot) vv_hot.style.display = 'none';
+    // Valve arrows - use real switch valve status (0=Radiator, 1=Hot Water)
+    if (valve_rad && current.switch_valve_status !== undefined) {
+        valve_rad.style.display = current.switch_valve_status === 0 ? 'block' : 'none';
+    }
+    if (valve_vv && current.switch_valve_status !== undefined) {
+        valve_vv.style.display = current.switch_valve_status > 0 ? 'block' : 'none';
+    }
+    // Hot water indicator - show when in hot water mode
+    if (vv_hot && current.switch_valve_status !== undefined) {
+        vv_hot.style.display = current.switch_valve_status > 0 ? 'block' : 'none';
+    }
 }
 
 // ==================== Helper Functions ====================

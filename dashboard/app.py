@@ -527,6 +527,9 @@ def get_status_data(time_range='24h'):
                 'radiator_return': get_value_with_minmax('radiator_return'),
                 'power': round(current_metrics.get('power_consumption', {}).get('value', 0), 0) if current_metrics.get('power_consumption', {}).get('value') is not None else None,
                 'compressor_running': bool(current_metrics.get('compressor_status', {}).get('value', 0)),
+                'brine_pump_running': bool(current_metrics.get('brine_pump_status', {}).get('value', 0)),
+                'radiator_pump_running': bool(current_metrics.get('radiator_pump_status', {}).get('value', 0)),
+                'switch_valve_status': int(current_metrics.get('switch_valve_status', {}).get('value', 0)) if current_metrics.get('switch_valve_status', {}).get('value') is not None else 0,
                 'aux_heater': current_metrics.get('additional_heat_percent', {}).get('value', 0) > 0 if current_metrics.get('additional_heat_percent', {}).get('value') is not None else False,
                 'current_cop': current_cop
             },
