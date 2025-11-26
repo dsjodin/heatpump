@@ -17,6 +17,8 @@ COPY providers/ ./providers/
 
 # Copy application code
 COPY dashboard/app.py .
+COPY dashboard/data_query.py .
+COPY dashboard/config_colors.py .
 COPY dashboard/templates/ templates/
 COPY dashboard/static/ static/
 
