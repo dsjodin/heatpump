@@ -390,45 +390,70 @@ function updateStatusBadges(data) {
     const compBadge = document.getElementById('status-compressor');
     const compText = document.getElementById('status-comp-text');
     if (current.compressor_running) {
-        compBadge.className = 'badge status-badge status-on';
+        compBadge.className = 'badge status-badge status-badge-topbar status-on';
         compText.textContent = 'PÅ';
     } else {
-        compBadge.className = 'badge status-badge status-off';
+        compBadge.className = 'badge status-badge status-badge-topbar status-off';
         compText.textContent = 'AV';
+    }
+
+    // Brine pump status
+    const brinePumpBadge = document.getElementById('status-brine-pump');
+    const brinePumpText = document.getElementById('status-brine-text');
+    if (current.brine_pump_running) {
+        brinePumpBadge.className = 'badge status-badge status-badge-topbar status-on';
+        brinePumpText.textContent = 'PÅ';
+    } else {
+        brinePumpBadge.className = 'badge status-badge status-badge-topbar status-off';
+        brinePumpText.textContent = 'AV';
+    }
+
+    // Radiator pump status
+    const radPumpBadge = document.getElementById('status-radiator-pump');
+    const radPumpText = document.getElementById('status-rad-text');
+    if (current.radiator_pump_running) {
+        radPumpBadge.className = 'badge status-badge status-badge-topbar status-on';
+        radPumpText.textContent = 'PÅ';
+    } else {
+        radPumpBadge.className = 'badge status-badge status-badge-topbar status-off';
+        radPumpText.textContent = 'AV';
     }
 
     // Aux heater status
     const auxBadge = document.getElementById('status-aux');
     const auxText = document.getElementById('status-aux-text');
     if (current.aux_heater) {
-        auxBadge.className = 'badge status-badge status-on';
+        auxBadge.className = 'badge status-badge status-badge-topbar status-on';
         auxText.textContent = 'PÅ';
     } else {
-        auxBadge.className = 'badge status-badge status-off';
+        auxBadge.className = 'badge status-badge status-badge-topbar status-off';
         auxText.textContent = 'AV';
+    }
+
+    // Valve status (0=Radiator, 1=Hot Water)
+    const valveBadge = document.getElementById('status-valve');
+    const valveText = document.getElementById('status-valve-text');
+    if (current.switch_valve_status !== undefined) {
+        valveBadge.className = 'badge status-badge status-badge-topbar status-on';
+        if (current.switch_valve_status === 0) {
+            valveText.textContent = 'Radiator';
+        } else {
+            valveText.textContent = 'Varmvatten';
+        }
+    } else {
+        valveBadge.className = 'badge status-badge status-badge-topbar';
+        valveText.textContent = '--';
     }
 
     // Alarm status
     const alarmBadge = document.getElementById('status-alarm-badge');
     const alarmText = document.getElementById('status-alarm-text');
     if (data.status.alarm && data.status.alarm.is_active) {
-        alarmBadge.className = 'badge status-badge status-alarm';
+        alarmBadge.className = 'badge status-badge status-badge-topbar status-alarm';
         alarmText.textContent = 'Aktivt!';
     } else {
-        alarmBadge.className = 'badge status-badge status-off';
+        alarmBadge.className = 'badge status-badge status-badge-topbar status-off';
         alarmText.textContent = 'Inget';
-    }
-
-    // Hot water status (assume heating if compressor on and valve switched)
-    const hwBadge = document.getElementById('status-hotwater');
-    const hwText = document.getElementById('status-hw-text');
-    // Simplified logic - could be enhanced
-    if (current.compressor_running) {
-        hwBadge.className = 'badge status-badge status-on';
-        hwText.textContent = 'Värmer';
-    } else {
-        hwBadge.className = 'badge status-badge';
-        hwText.textContent = 'Standby';
     }
 }
 
