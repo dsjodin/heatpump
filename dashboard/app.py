@@ -720,7 +720,7 @@ def background_updates():
             }
 
             # Broadcast to all clients
-            socketio.emit('graph_update', update_data, broadcast=True)
+            socketio.emit('graph_update', update_data)
 
             logger.info(f"✅ Updates pushed at {datetime.now().strftime('%H:%M:%S')}")
 
