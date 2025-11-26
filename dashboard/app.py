@@ -482,17 +482,17 @@ def get_status_data(time_range='24h'):
         # Get min/max values for the time range
         min_max = data_query.get_min_max_values(time_range)
 
-        # Calculate current COP if possible
+        # Calculate COP average for the selected time range
         current_cop = None
         try:
-            cop_df = data_query.calculate_cop('1h')  # Get last hour for current COP
+            cop_df = data_query.calculate_cop(time_range)  # Use same time range as dashboard
             if not cop_df.empty and 'estimated_cop' in cop_df.columns:
-                # Get the most recent non-null COP value
+                # Get the average COP value for consistency with KPI card
                 cop_values = cop_df['estimated_cop'].dropna()
                 if len(cop_values) > 0:
-                    current_cop = round(cop_values.iloc[-1], 2)
+                    current_cop = round(cop_values.mean(), 2)
         except Exception as e:
-            logger.debug(f"Could not calculate current COP: {e}")
+            logger.debug(f"Could not calculate COP: {e}")
             pass
 
         def get_value_with_minmax(metric_name):
