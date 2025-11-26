@@ -123,24 +123,32 @@ class HeatPumpCollector:
     def _setup_mqtt(self):
         """Setup MQTT client and callbacks"""
         mqtt_config = self.config['mqtt']
-        
-        self.mqtt_client = mqtt.Client(client_id=mqtt_config['client_id'])
+
+        # Create client with clean session and automatic reconnect
+        self.mqtt_client = mqtt.Client(
+            client_id=mqtt_config['client_id'],
+            clean_session=True,
+            protocol=mqtt.MQTTv311
+        )
         self.mqtt_client.username_pw_set(
             mqtt_config['username'],
             mqtt_config['password']
         )
-        
+
+        # Enable automatic reconnect
+        self.mqtt_client.reconnect_delay_set(min_delay=1, max_delay=120)
+
         # Set callbacks
         self.mqtt_client.on_connect = self._on_connect
         self.mqtt_client.on_disconnect = self._on_disconnect
         self.mqtt_client.on_message = self._on_message
-        
-        # Connect to broker
+
+        # Connect to broker with keepalive
         try:
             self.mqtt_client.connect(
                 mqtt_config['broker'],
                 mqtt_config['port'],
-                keepalive=60
+                keepalive=mqtt_config.get('keepalive', 60)
             )
             logger.info(f"Connecting to MQTT broker: {mqtt_config['broker']}:{mqtt_config['port']}")
         except Exception as e:
@@ -174,7 +182,18 @@ class HeatPumpCollector:
         """Callback when disconnected from MQTT broker"""
         self.connected = False
         if rc != 0:
-            logger.warning(f"Unexpected disconnect from MQTT broker. Return code: {rc}")
+            # MQTT error codes: https://github.com/eclipse/paho.mqtt.python/blob/master/src/paho/mqtt/client.py
+            error_messages = {
+                1: "Incorrect protocol version",
+                2: "Invalid client identifier",
+                3: "Server unavailable",
+                4: "Bad username or password",
+                5: "Not authorized",
+                7: "Connection lost"
+            }
+            error_msg = error_messages.get(rc, f"Unknown error (code {rc})")
+            logger.warning(f"Unexpected disconnect from MQTT broker: {error_msg}")
+            logger.info("Will attempt to reconnect automatically...")
         else:
             logger.info("Disconnected from MQTT broker")
     
@@ -258,11 +277,29 @@ class HeatPumpCollector:
         # Start MQTT loop
         self.mqtt_client.loop_start()
 
-        # Keep running
+        # Keep running with reconnect logic
+        reconnect_attempts = 0
+        max_reconnect_attempts = 5
+
         try:
             while True:
                 if not self.connected:
-                    logger.warning("Not connected to MQTT broker, waiting...")
+                    logger.warning("Not connected to MQTT broker, attempting to reconnect...")
+                    try:
+                        self.mqtt_client.reconnect()
+                        reconnect_attempts += 1
+                        if reconnect_attempts >= max_reconnect_attempts:
+                            logger.error("Max reconnect attempts reached, waiting longer...")
+                            time.sleep(60)
+                            reconnect_attempts = 0
+                    except Exception as e:
+                        logger.error(f"Reconnect failed: {e}")
+                else:
+                    # Reset reconnect counter when connected
+                    if reconnect_attempts > 0:
+                        logger.info("Successfully reconnected to MQTT broker")
+                        reconnect_attempts = 0
+
                 time.sleep(10)
 
         except KeyboardInterrupt:
