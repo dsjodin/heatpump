@@ -9,16 +9,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY dashboard/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application code
-COPY app.py .
-COPY templates/ templates/
-COPY static/ static/
+# Copy providers module (shared between collector and dashboard)
+COPY providers/ ./providers/
 
-# Create symlink directory for shared modules (will be volume mounted)
-RUN mkdir -p /app/shared
+# Copy application code
+COPY dashboard/app.py .
+COPY dashboard/templates/ templates/
+COPY dashboard/static/ static/
 
 # Expose port
 EXPOSE 8050
