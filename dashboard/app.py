@@ -9,6 +9,7 @@ import os
 import sys
 import logging
 import yaml
+import math
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request
 from flask_socketio import SocketIO, emit
@@ -81,6 +82,23 @@ def index():
                          brand_name=provider.get_display_name(),
                          dashboard_title=provider.get_dashboard_title())
 
+def clean_nan_values(obj):
+    """
+    Recursively replace NaN and Infinity with None for JSON serialization.
+    JSON doesn't support NaN/Infinity, so we must convert them to null.
+    """
+    if isinstance(obj, dict):
+        return {key: clean_nan_values(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [clean_nan_values(item) for item in obj]
+    elif isinstance(obj, float):
+        if math.isnan(obj) or math.isinf(obj):
+            return None
+        return obj
+    else:
+        return obj
+
+
 @app.route('/test')
 def test():
     """Serve test dashboard page"""
@@ -126,6 +144,8 @@ def get_initial_data():
         }
 
         logger.info(f"✅ Initial data loaded successfully")
+        # Clean NaN values before JSON serialization
+        data = clean_nan_values(data)
         return jsonify(data)
 
     except Exception as e:
@@ -650,6 +670,7 @@ def handle_time_range_change(data):
             'timestamp': datetime.now().isoformat()
         }
 
+        update_data = clean_nan_values(update_data)
         emit('graph_update', update_data)
         logger.info(f"✅ Sent updated data to client {client_id}")
 
@@ -681,6 +702,7 @@ def handle_manual_update(data):
             'timestamp': datetime.now().isoformat()
         }
 
+        update_data = clean_nan_values(update_data)
         emit('graph_update', update_data)
 
     except Exception as e:
@@ -723,7 +745,8 @@ def background_updates():
                 'timestamp': datetime.now().isoformat()
             }
 
-            # Broadcast to all clients
+            # Clean NaN values and broadcast to all clients
+            update_data = clean_nan_values(update_data)
             socketio.emit('graph_update', update_data)
 
             logger.info(f"✅ Updates pushed at {datetime.now().strftime('%H:%M:%S')}")
