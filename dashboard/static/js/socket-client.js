@@ -469,23 +469,76 @@ function updateSchemaTemps(data) {
 
     const current = data.status.current;
 
-    // Update schema temperature overlays
-    function updateSchemaTemp(id, tempData) {
-        const el = document.getElementById(`schema-${id}`);
-        if (!el) return;
+    // Update temperature boxes
+    const temp_outdoor = document.getElementById('temp-utetemp');
+    const temp_hotwater = document.getElementById('temp-varmvatten');
+    const temp_brine_in = document.getElementById('temp-kb-in');
+    const temp_brine_out = document.getElementById('temp-kb-ut');
+    const temp_forward = document.getElementById('temp-framledning');
+    const temp_return = document.getElementById('temp-radiator-retur');
 
-        const valueSpan = el.querySelector('.schema-temp-value');
-        if (valueSpan && tempData && tempData.current !== null) {
-            valueSpan.textContent = `${tempData.current.toFixed(1)}°C`;
+    if (temp_outdoor && current.outdoor_temp && current.outdoor_temp.current !== null) {
+        temp_outdoor.textContent = `${current.outdoor_temp.current.toFixed(1)}°C`;
+    }
+    if (temp_hotwater && current.hot_water && current.hot_water.current !== null) {
+        temp_hotwater.textContent = `${current.hot_water.current.toFixed(1)}°C`;
+    }
+    if (temp_brine_in && current.brine_in && current.brine_in.current !== null) {
+        temp_brine_in.textContent = `${current.brine_in.current.toFixed(1)}°C`;
+    }
+    if (temp_brine_out && current.brine_out && current.brine_out.current !== null) {
+        temp_brine_out.textContent = `${current.brine_out.current.toFixed(1)}°C`;
+    }
+    if (temp_forward && current.radiator_forward && current.radiator_forward.current !== null) {
+        temp_forward.textContent = `${current.radiator_forward.current.toFixed(1)}°C`;
+    }
+    if (temp_return && current.radiator_return && current.radiator_return.current !== null) {
+        temp_return.textContent = `${current.radiator_return.current.toFixed(1)}°C`;
+    }
+
+    // Update animated components
+    const komp = document.getElementById('schema-kompressor');
+    const kb_pump = document.getElementById('schema-kb-pump');
+    const rad_pump = document.getElementById('schema-rad-pump');
+    const aux_3kw = document.getElementById('schema-3kw');
+    const radiator = document.getElementById('schema-radiator');
+    const valve_rad = document.getElementById('schema-valve-radiator');
+    const valve_vv = document.getElementById('schema-valve-varmvatten');
+    const vv_hot = document.getElementById('schema-vv-on');
+
+    // Show/hide compressor animation when running
+    if (komp && current.compressor_running !== undefined) {
+        komp.style.display = current.compressor_running ? 'block' : 'none';
+    }
+
+    // Show/hide brine pump rotation
+    if (kb_pump && current.compressor_running !== undefined) {
+        kb_pump.style.display = current.compressor_running ? 'block' : 'none';
+    }
+
+    // Show/hide radiator pump rotation
+    if (rad_pump && current.compressor_running !== undefined) {
+        rad_pump.style.display = current.compressor_running ? 'block' : 'none';
+    }
+
+    // Change aux heater image based on status
+    if (aux_3kw && current.aux_heater !== undefined) {
+        const aux_src = current.aux_heater ? '/static/assets/schema/3kw-on.png' : '/static/assets/schema/3kw-off.png';
+        if (aux_3kw.src !== aux_src) {
+            aux_3kw.src = aux_src;
         }
     }
 
-    updateSchemaTemp('outdoor', current.outdoor_temp);
-    updateSchemaTemp('brine-in', current.brine_in);
-    updateSchemaTemp('brine-out', current.brine_out);
-    updateSchemaTemp('rad-forward', current.radiator_forward);
-    updateSchemaTemp('rad-return', current.radiator_return);
-    updateSchemaTemp('hotwater', current.hot_water);
+    // Show radiator hot indicator when forward temp > 30°C
+    if (radiator && current.radiator_forward && current.radiator_forward.current !== null) {
+        radiator.style.display = current.radiator_forward.current > 30 ? 'block' : 'none';
+    }
+
+    // Valve arrows (would need switch_valve_status in status data to work properly)
+    // For now, leave them hidden as we don't have this data yet
+    if (valve_rad) valve_rad.style.display = 'none';
+    if (valve_vv) valve_vv.style.display = 'none';
+    if (vv_hot) vv_hot.style.display = 'none';
 }
 
 // ==================== Helper Functions ====================

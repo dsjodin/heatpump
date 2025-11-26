@@ -492,49 +492,60 @@
                         <p class="text-muted mb-3">
                             <i class="fas fa-info-circle"></i> Visar värmepumpens aktuella driftläge med riktiga temperaturvärden och animationer
                         </p>
-                        <div class="schema-container" style="position: relative; min-height: 500px;">
-                            <!-- Background Image (will be added by user) -->
+                        <div class="schema-container" id="schema-container">
+                            <!-- Background Image -->
                             <img src="{{ url_for('static', filename='assets/schema/BV_main2.png') }}"
                                  id="schema-background"
                                  class="schema-background"
-                                 alt="Heat Pump System Schema"
-                                 onerror="this.style.display='none'; document.getElementById('schema-placeholder').style.display='block';">
+                                 alt="Heat Pump System Schema">
 
-                            <!-- Placeholder if image not found -->
-                            <div id="schema-placeholder" class="schema-placeholder text-center" style="display: none; padding: 100px;">
-                                <i class="fas fa-image fa-5x text-muted mb-3"></i>
-                                <h5 class="text-muted">System Schema Placeholder</h5>
-                                <p class="text-muted">Place BV_main2.png in dashboard/static/assets/schema/ to display system diagram</p>
-                            </div>
+                            <!-- Temperature Boxes (positioned with CSS) -->
+                            <div id="temp-utetemp" class="schema-temp-box temp-outdoor">--°C</div>
+                            <div id="temp-varmvatten" class="schema-temp-box temp-hotwater">--°C</div>
+                            <div id="temp-kb-in" class="schema-temp-box temp-brine-in">--°C</div>
+                            <div id="temp-kb-ut" class="schema-temp-box temp-brine-out">--°C</div>
+                            <div id="temp-framledning" class="schema-temp-box temp-forward">--°C</div>
+                            <div id="temp-radiator-retur" class="schema-temp-box temp-return">--°C</div>
 
-                            <!-- Temperature Overlays (positioned absolutely over schema) -->
-                            <div class="schema-overlay">
-                                <!-- These will be positioned based on the schema image -->
-                                <div class="schema-temp-label" id="schema-outdoor" style="position: absolute; top: 50px; left: 50px;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">Ute</span>
-                                </div>
-                                <div class="schema-temp-label" id="schema-brine-in" style="position: absolute; top: 150px; left: 100px;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">KB In</span>
-                                </div>
-                                <div class="schema-temp-label" id="schema-brine-out" style="position: absolute; top: 150px; right: 100px;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">KB Ut</span>
-                                </div>
-                                <div class="schema-temp-label" id="schema-rad-forward" style="position: absolute; bottom: 150px; left: 100px;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">Fram</span>
-                                </div>
-                                <div class="schema-temp-label" id="schema-rad-return" style="position: absolute; bottom: 150px; right: 100px;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">Retur</span>
-                                </div>
-                                <div class="schema-temp-label" id="schema-hotwater" style="position: absolute; bottom: 50px; left: 50%;">
-                                    <span class="schema-temp-value">--°C</span>
-                                    <span class="schema-temp-name">Varmvatten</span>
-                                </div>
-                            </div>
+                            <!-- Animated Components -->
+                            <img src="{{ url_for('static', filename='assets/schema/BV_komp_anim.png') }}"
+                                 id="schema-kompressor"
+                                 class="schema-kompressor"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/KB-snurr.png') }}"
+                                 id="schema-kb-pump"
+                                 class="schema-kb-pump rotating"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/VB-snurr.png') }}"
+                                 id="schema-rad-pump"
+                                 class="schema-rad-pump rotating"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/3kw-off.png') }}"
+                                 id="schema-3kw"
+                                 class="schema-3kw">
+
+                            <img src="{{ url_for('static', filename='assets/schema/RAD-hot.png') }}"
+                                 id="schema-radiator"
+                                 class="schema-radiator"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/RAD-pil.png') }}"
+                                 id="schema-valve-radiator"
+                                 class="schema-valve-arrow"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/VV-pil.png') }}"
+                                 id="schema-valve-varmvatten"
+                                 class="schema-valve-arrow"
+                                 style="display: none;">
+
+                            <img src="{{ url_for('static', filename='assets/schema/VV-hot.png') }}"
+                                 id="schema-vv-on"
+                                 class="schema-varmvatten"
+                                 style="display: none;">
                         </div>
                     </div>
                 </div>
