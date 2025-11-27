@@ -231,7 +231,16 @@ function updateTemperatureChart(data) {
         series: series,
         tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'cross' }
+            axisPointer: { type: 'cross' },
+            formatter: function(params) {
+                let result = params[0].axisValueLabel + '<br/>';
+                params.forEach(param => {
+                    const value = param.value[1];
+                    const roundedValue = value !== null && value !== undefined ? value.toFixed(1) : '--';
+                    result += param.marker + ' ' + param.seriesName + ': ' + roundedValue + '°C<br/>';
+                });
+                return result;
+            }
         },
         backgroundColor: 'transparent'
     };
@@ -392,7 +401,23 @@ function updatePerformanceChart(data) {
         ],
         tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'cross' }
+            axisPointer: { type: 'cross' },
+            formatter: function(params) {
+                let result = params[0].axisValueLabel + '<br/>';
+                params.forEach(param => {
+                    const value = param.value[1];
+                    let roundedValue;
+                    if (value !== null && value !== undefined) {
+                        // For status values (0 or 1), show without decimals
+                        roundedValue = (value === 0 || value === 1) ? value.toString() : value.toFixed(1);
+                    } else {
+                        roundedValue = '--';
+                    }
+                    const unit = param.seriesName.includes('ΔT') ? '°C' : '';
+                    result += param.marker + ' ' + param.seriesName + ': ' + roundedValue + unit + '<br/>';
+                });
+                return result;
+            }
         },
         backgroundColor: 'transparent'
     };
@@ -453,7 +478,28 @@ function updatePowerChart(data) {
         ],
         tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'cross' }
+            axisPointer: { type: 'cross' },
+            formatter: function(params) {
+                let result = params[0].axisValueLabel + '<br/>';
+                params.forEach(param => {
+                    const value = param.value[1];
+                    let roundedValue;
+                    if (value !== null && value !== undefined) {
+                        // For status values (0 or 1), show without decimals
+                        roundedValue = (value === 0 || value === 1) ? value.toString() : value.toFixed(1);
+                    } else {
+                        roundedValue = '--';
+                    }
+                    let unit = '';
+                    if (param.seriesName === 'Effekt') {
+                        unit = ' W';
+                    } else if (param.seriesName === 'Tillsats %') {
+                        unit = '%';
+                    }
+                    result += param.marker + ' ' + param.seriesName + ': ' + roundedValue + unit + '<br/>';
+                });
+                return result;
+            }
         },
         backgroundColor: 'transparent'
     };
@@ -520,7 +566,27 @@ function updateValveChart(data) {
         ],
         tooltip: {
             trigger: 'axis',
-            axisPointer: { type: 'cross' }
+            axisPointer: { type: 'cross' },
+            formatter: function(params) {
+                let result = params[0].axisValueLabel + '<br/>';
+                params.forEach(param => {
+                    const value = param.value[1];
+                    let roundedValue;
+                    if (value !== null && value !== undefined) {
+                        // For status values (0 or 1), show without decimals
+                        if (value === 0 || value === 1) {
+                            roundedValue = value.toString();
+                        } else {
+                            roundedValue = value.toFixed(1);
+                        }
+                    } else {
+                        roundedValue = '--';
+                    }
+                    const unit = param.seriesName === 'VV Temp' ? '°C' : '';
+                    result += param.marker + ' ' + param.seriesName + ': ' + roundedValue + unit + '<br/>';
+                });
+                return result;
+            }
         },
         backgroundColor: 'transparent'
     };
