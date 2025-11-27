@@ -39,6 +39,28 @@ influxdb:
   batch_size: 100
   flush_interval: 10
 
+# Heat Pump Simulator
+# Use this to generate realistic metrics for testing UI with different manufacturers
+simulator:
+  # Enable/disable simulator
+  enabled: false
+
+  # Manufacturer to simulate: 'thermia', 'ivt', or 'nibe'
+  # Each manufacturer has different metric names and conventions
+  manufacturer: thermia
+
+  # How often to generate and publish metrics (seconds)
+  update_interval: 10
+
+  # Initial outdoor temperature (affects all other temperatures)
+  outdoor_temp: -5
+
+  # Simulation mode:
+  # - 'mqtt': Publish to MQTT broker (default)
+  # - 'influxdb': Write directly to InfluxDB
+  # - 'both': Publish to both MQTT and InfluxDB
+  mode: mqtt
+
 # H66 Register definitions are now defined in brand-specific providers
 # See providers/thermia/registers.py or providers/ivt/registers.py
 # Legacy 'registers' section below is kept for backwards compatibility but will be ignored

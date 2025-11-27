@@ -51,6 +51,25 @@ services:
     networks:
       - thermia-net
 
+  # Heat Pump Simulator (for testing UI with different manufacturers)
+  # Enable in config.yaml: simulator.enabled = true
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    container_name: thermia-simulator
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+    networks:
+      - thermia-net
+    profiles:
+      - simulator  # Only starts when: docker-compose --profile simulator up
+
   # Web Dashboard
   dashboard:
     build:
