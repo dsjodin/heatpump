@@ -284,6 +284,7 @@ function updateTemperatureChart(data) {
                 data: data[metric.key].map((v, i) => [data.timestamps[i], v]),
                 smooth: true,
                 lineStyle: { color: metric.color, width: 2.5 },
+                itemStyle: { color: metric.color },
                 showSymbol: false
             });
         }
