@@ -199,6 +199,7 @@ function updateCopChart(data) {
             name: 'COP',
             data: data.timestamps.map((t, i) => [t, data.values[i]]),
             smooth: true,
+            showSymbol: false,
             lineStyle: {
                 color: '#4CAF50',
                 width: 3
@@ -351,7 +352,14 @@ function updateRuntimeChart(data) {
             ],
             label: {
                 formatter: '{b}: {d}%',
-                fontSize: 12
+                fontSize: 13,
+                position: 'outside',
+                overflow: 'none'
+            },
+            labelLine: {
+                show: true,
+                length: 15,
+                length2: 10
             },
             emphasis: {
                 itemStyle: {
