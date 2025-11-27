@@ -163,6 +163,12 @@ def get_cop_data(time_range):
         if cop_df.empty or 'estimated_cop' not in cop_df.columns:
             return {'timestamps': [], 'values': [], 'avg': 0}
 
+        # Filter out null/NaN values to avoid gaps in chart
+        cop_df = cop_df.dropna(subset=['estimated_cop'])
+
+        if cop_df.empty:
+            return {'timestamps': [], 'values': [], 'avg': 0}
+
         return {
             'timestamps': cop_df['_time'].astype(str).tolist(),
             'values': cop_df['estimated_cop'].tolist(),

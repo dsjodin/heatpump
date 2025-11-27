@@ -199,8 +199,9 @@ function updateCopChart(data) {
             type: 'line',
             name: 'COP',
             data: data.timestamps.map((t, i) => [t, data.values[i]]),
-            smooth: true,
-            showSymbol: false,
+            smooth: false,
+            showSymbol: true,
+            symbolSize: 6,
             lineStyle: {
                 color: '#2e7d32',
                 width: 2.5
