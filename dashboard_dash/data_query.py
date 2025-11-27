@@ -70,32 +70,33 @@ class HeatPumpDataQuery:
     def _get_aggregation_window(self, time_range: str) -> str:
         """
         NYTT: Dynamisk aggregering baserat på tidsperiod
-        
+
         Returnerar lämpligt aggregeringsfönster för att balansera prestanda och noggrannhet
+        Uppdaterad med fler datapunkter för bättre detaljrikedom
         """
         # Extrahera numeriskt värde och enhet från time_range (t.ex. "24h", "7d")
         if time_range.endswith('h'):
             hours = int(time_range[:-1])
             if hours <= 1:
-                return "1m"   # 1 timme = 1 minut aggregering
+                return "30s"  # 1 timme = 30 sekunder aggregering → ~120 punkter
             elif hours <= 6:
-                return "2m"   # 6 timmar = 2 minuter
+                return "1m"   # 6 timmar = 1 minut → ~360 punkter
             elif hours <= 24:
-                return "5m"   # 24 timmar = 5 minuter
+                return "2m"   # 24 timmar = 2 minuter → ~720 punkter
             else:
-                return "10m"  # >24 timmar = 10 minuter
+                return "5m"   # >24 timmar = 5 minuter
         elif time_range.endswith('d'):
             days = int(time_range[:-1])
             if days <= 1:
-                return "5m"   # 1 dag = 5 minuter
+                return "2m"   # 1 dag = 2 minuter → ~720 punkter
             elif days <= 7:
-                return "15m"  # 7 dagar = 15 minuter
+                return "5m"   # 7 dagar = 5 minuter → ~2016 punkter
             elif days <= 30:
-                return "1h"   # 30 dagar = 1 timme
+                return "15m"  # 30 dagar = 15 minuter → ~2880 punkter
             else:
-                return "4h"   # >30 dagar = 4 timmar
+                return "1h"   # >30 dagar = 1 timme → ~720 punkter
         else:
-            return "5m"  # Default
+            return "2m"  # Default
     
     def query_metrics(self, metric_names: List[str], time_range: str = '24h', 
                      aggregation_window: Optional[str] = None) -> pd.DataFrame:
