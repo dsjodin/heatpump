@@ -202,23 +202,32 @@ function updateCopChart(data) {
             smooth: true,
             showSymbol: false,
             lineStyle: {
-                color: '#4CAF50',
-                width: 3
+                color: '#2e7d32',
+                width: 2.5
             },
             areaStyle: {
-                color: 'rgba(76, 175, 80, 0.2)'
+                color: {
+                    type: 'linear',
+                    x: 0, y: 0, x2: 0, y2: 1,
+                    colorStops: [
+                        { offset: 0, color: 'rgba(46, 125, 50, 0.4)' },
+                        { offset: 1, color: 'rgba(46, 125, 50, 0.05)' }
+                    ]
+                }
             },
             markLine: {
                 silent: false,
                 symbol: 'none',
                 lineStyle: {
                     type: 'dashed',
-                    color: '#ff9800',
+                    color: '#f57c00',
                     width: 2
                 },
                 label: {
                     position: 'end',
-                    formatter: `Medel: ${safeFixed(data.avg, 2)}`
+                    formatter: `Medel: ${safeFixed(data.avg, 2)}`,
+                    fontSize: 11,
+                    color: '#f57c00'
                 },
                 data: [{
                     yAxis: data.avg !== null ? data.avg : 0
