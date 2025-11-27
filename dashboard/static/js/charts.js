@@ -172,19 +172,19 @@ function updateCopChart(data) {
 
     const option = {
         grid: {
-            left: 60,
-            right: 40,
-            top: 40,
-            bottom: 60,
+            left: 50,
+            right: 15,
+            top: 35,
+            bottom: 50,
             backgroundColor: 'transparent'
         },
         xAxis: {
             type: 'time',
             name: 'Tid',
             nameLocation: 'middle',
-            nameGap: 40,
+            nameGap: 35,
             axisLine: { lineStyle: { color: '#999' } },
-            axisLabel: { fontSize: 11 }
+            axisLabel: { fontSize: 10 }
         },
         yAxis: {
             type: 'value',
@@ -192,7 +192,8 @@ function updateCopChart(data) {
             min: 0,
             max: 6,
             axisLine: { lineStyle: { color: '#999' } },
-            splitLine: { lineStyle: { color: '#eee' } }
+            splitLine: { lineStyle: { color: '#eee' } },
+            axisLabel: { fontSize: 10 }
         },
         series: [{
             type: 'line',
@@ -389,10 +390,16 @@ function updateSankeyChart(data) {
 
     const option = {
         title: {
-            text: `Energiflöde (COP: ${safeFixed(data.cop, 2)}, ${safeFixed(data.free_energy_percent, 0)}% gratis från mark)`,
-            textStyle: { fontSize: 14, color: '#666' },
+            text: `COP: ${safeFixed(data.cop, 2)} (${safeFixed(data.free_energy_percent, 0)}% från mark)`,
+            textStyle: { fontSize: 13, color: '#666', fontWeight: 'normal' },
             left: 'center',
-            top: 10
+            top: 5
+        },
+        grid: {
+            left: 10,
+            right: 10,
+            top: 35,
+            bottom: 10
         },
         series: [{
             type: 'sankey',
@@ -404,17 +411,21 @@ function updateSankeyChart(data) {
                 target: link.target,
                 value: link.value
             })),
+            nodeWidth: 20,
+            nodeGap: 12,
             lineStyle: {
                 color: 'gradient',
-                curveness: 0.5
+                curveness: 0.5,
+                opacity: 0.5
             },
             itemStyle: {
-                borderWidth: 2,
+                borderWidth: 1,
                 borderColor: '#fff'
             },
             label: {
                 color: '#333',
-                fontSize: 12
+                fontSize: 11,
+                fontWeight: 'bold'
             }
         }],
         tooltip: {
