@@ -603,20 +603,6 @@ function updateKPIs(data) {
         document.getElementById('kpi-cop').textContent = safeFixed(data.cop.avg, 2);
     }
 
-    // Compressor runtime (from runtime data)
-    if (data.runtime && data.runtime.compressor_percent !== undefined) {
-        document.getElementById('kpi-compressor').textContent = `${safeFixed(data.runtime.compressor_percent, 0)}%`;
-    }
-
-    // Indoor temperature (latest value from temperature data)
-    if (data.temperature && data.temperature.indoor_temp) {
-        const temps = data.temperature.indoor_temp;
-        if (temps.length > 0) {
-            const latest = temps[temps.length - 1];
-            document.getElementById('kpi-indoor').textContent = `${safeFixed(latest, 1)}°C`;
-        }
-    }
-
     // Hot water temperature (latest value)
     if (data.temperature && data.temperature.hot_water_top) {
         const temps = data.temperature.hot_water_top;
@@ -638,7 +624,7 @@ function updateKPIs(data) {
         // Compressor Runtime Stats
         if (data.kpi.runtime) {
             const runtime = data.kpi.runtime;
-            document.getElementById('kpi-comp-runtime').textContent = `${safeFixed(runtime.compressor_percent, 0)}%`;
+            document.getElementById('kpi-compressor').textContent = `${safeFixed(runtime.compressor_percent, 0)}%`;
             document.getElementById('kpi-comp-hours').textContent = `${safeFixed(runtime.compressor_hours, 1)} timmar`;
 
             // Aux Heater Runtime

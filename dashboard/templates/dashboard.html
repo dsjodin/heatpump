@@ -237,110 +237,108 @@
         </div>
 
         <!-- KPI Cards Row -->
-        <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-3">
+        <div class="row mb-3">
+            <div class="col-lg-3 col-md-6 mb-2">
                 <div class="kpi-card kpi-success">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-tachometer-alt"></i>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">COP (Värmefaktor)</div>
+                                <div class="kpi-value" id="kpi-cop">--</div>
+                                <div class="kpi-subtitle">Genomsnitt</div>
+                            </div>
                         </div>
-                        <div class="kpi-label">COP (Värmefaktor)</div>
-                        <div class="kpi-value" id="kpi-cop">--</div>
-                        <div class="kpi-subtitle">Genomsnitt</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-3">
+            <div class="col-lg-3 col-md-6 mb-2">
                 <div class="kpi-card kpi-primary">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-bolt"></i>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-cog"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">Kompressor</div>
+                                <div class="kpi-value" id="kpi-compressor">--</div>
+                                <div class="kpi-subtitle" id="kpi-comp-hours">Drifttid</div>
+                            </div>
                         </div>
-                        <div class="kpi-label">Kompressor</div>
-                        <div class="kpi-value" id="kpi-compressor">--</div>
-                        <div class="kpi-subtitle">Drifttid</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="kpi-card kpi-info">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-thermometer-half"></i>
-                        </div>
-                        <div class="kpi-label">Innetemperatur</div>
-                        <div class="kpi-value" id="kpi-indoor">--</div>
-                        <div class="kpi-subtitle">Aktuell</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-3">
+            <div class="col-lg-3 col-md-6 mb-2">
                 <div class="kpi-card kpi-warning">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-fire-flame-curved"></i>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-fire-flame-curved"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">Varmvatten</div>
+                                <div class="kpi-value" id="kpi-hot-water">--</div>
+                                <div class="kpi-subtitle">Temperatur</div>
+                            </div>
                         </div>
-                        <div class="kpi-label">Varmvatten</div>
-                        <div class="kpi-value" id="kpi-hot-water">--</div>
-                        <div class="kpi-subtitle">Temperatur</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6 mb-2">
+                <div class="kpi-card kpi-primary">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">Energikostnad</div>
+                                <div class="kpi-value" id="kpi-energy-cost">-- kr</div>
+                                <div class="kpi-subtitle" id="kpi-energy-kwh">-- kWh</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Extended KPI Cards Row -->
-        <div class="row mb-4">
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="kpi-card kpi-primary">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-bolt"></i>
-                        </div>
-                        <div class="kpi-label">Energikostnad</div>
-                        <div class="kpi-value" id="kpi-energy-cost">-- kr</div>
-                        <div class="kpi-subtitle" id="kpi-energy-kwh">-- kWh</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-3">
-                <div class="kpi-card kpi-success">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-cog"></i>
-                        </div>
-                        <div class="kpi-label">Kompressor</div>
-                        <div class="kpi-value" id="kpi-comp-runtime">--%</div>
-                        <div class="kpi-subtitle" id="kpi-comp-hours">-- timmar</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-md-6 mb-3">
+        <div class="row mb-3">
+            <div class="col-lg-3 col-md-6 mb-2">
                 <div class="kpi-card kpi-warning">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-fire"></i>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">Tillsatsvärme</div>
+                                <div class="kpi-value" id="kpi-aux-runtime">--%</div>
+                                <div class="kpi-subtitle" id="kpi-aux-hours">0.0 timmar</div>
+                            </div>
                         </div>
-                        <div class="kpi-label">Tillsatsvärme</div>
-                        <div class="kpi-value" id="kpi-aux-runtime">--%</div>
-                        <div class="kpi-subtitle" id="kpi-aux-hours">-- timmar</div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-3 col-md-6 mb-3">
+            <div class="col-lg-3 col-md-6 mb-2">
                 <div class="kpi-card kpi-info">
-                    <div class="card-body text-center">
-                        <div class="kpi-icon">
-                            <i class="fas fa-bath"></i>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="kpi-icon">
+                                <i class="fas fa-bath"></i>
+                            </div>
+                            <div class="text-end flex-grow-1">
+                                <div class="kpi-label">Varmvattencykler</div>
+                                <div class="kpi-value" id="kpi-hw-cycles">--</div>
+                                <div class="kpi-subtitle" id="kpi-hw-cycles-per-day">-- /dag</div>
+                            </div>
                         </div>
-                        <div class="kpi-label">Varmvattencykler</div>
-                        <div class="kpi-value" id="kpi-hw-cycles">--</div>
-                        <div class="kpi-subtitle" id="kpi-hw-cycles-per-day">-- /dag</div>
                     </div>
                 </div>
             </div>
