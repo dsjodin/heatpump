@@ -92,15 +92,19 @@ body {
 /* ==================== KPI Cards ==================== */
 .kpi-card {
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     box-shadow: var(--shadow-md);
     transition: all 0.3s ease;
     overflow: hidden;
     height: 100%;
 }
 
+.kpi-card .card-body {
+    padding: 0.8rem;
+}
+
 .kpi-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-lg);
 }
 
@@ -125,26 +129,28 @@ body {
 }
 
 .kpi-icon {
-    font-size: 2rem;
+    font-size: 1.3rem;
     opacity: 0.9;
+    margin-bottom: 0.3rem;
 }
 
 .kpi-label {
-    font-size: 0.9rem;
+    font-size: 0.75rem;
     opacity: 0.9;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.25rem;
 }
 
 .kpi-value {
-    font-size: 2.2rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin: 0;
+    line-height: 1.2;
 }
 
 .kpi-subtitle {
-    font-size: 0.85rem;
+    font-size: 0.7rem;
     opacity: 0.8;
-    margin-top: 0.3rem;
+    margin-top: 0.2rem;
 }
 
 /* ==================== Chart Cards ==================== */
@@ -204,11 +210,23 @@ body {
 /* ==================== Responsive Design ==================== */
 @media (max-width: 768px) {
     .kpi-value {
-        font-size: 1.8rem;
+        font-size: 1.3rem;
     }
 
     .kpi-icon {
-        font-size: 1.5rem;
+        font-size: 1.1rem;
+    }
+
+    .kpi-label {
+        font-size: 0.7rem;
+    }
+
+    .kpi-subtitle {
+        font-size: 0.65rem;
+    }
+
+    .kpi-card .card-body {
+        padding: 0.6rem;
     }
 
     .chart-card {
