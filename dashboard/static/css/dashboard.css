@@ -491,6 +491,11 @@ body {
     color: #868e96;
 }
 
+.sparkline-container {
+    height: 40px;
+    width: 100%;
+}
+
 /* ==================== Hot Water Stats ==================== */
 .hw-stat-box {
     padding: 1rem;

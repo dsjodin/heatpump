@@ -55,6 +55,16 @@ function initializeCharts(data) {
         }
     });
 
+    // Initialize sparkline charts
+    const sparklineIds = ['sparkline-brine-in', 'sparkline-brine-out',
+                          'sparkline-radiator-forward', 'sparkline-radiator-return'];
+    sparklineIds.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            charts[id] = echarts.init(element);
+        }
+    });
+
     // Update all charts with initial data
     updateAllCharts(data);
 
@@ -77,12 +87,79 @@ function initializeCharts(data) {
 
 function updateAllCharts(data) {
     if (data.cop) updateCopChart(data.cop);
-    if (data.temperature) updateTemperatureChart(data.temperature);
+    if (data.temperature) {
+        updateTemperatureChart(data.temperature);
+        updateSparklines(data.temperature);
+    }
     if (data.runtime) updateRuntimeChart(data.runtime);
     if (data.sankey) updateSankeyChart(data.sankey);
     if (data.performance) updatePerformanceChart(data.performance);
     if (data.power) updatePowerChart(data.power);
     if (data.valve) updateValveChart(data.valve);
+}
+
+// ==================== Sparkline Charts ====================
+
+function updateSparklines(temperatureData) {
+    const sparklineConfigs = [
+        { id: 'sparkline-brine-in', dataKey: 'brine_in_evaporator', color: '#00d4ff' },
+        { id: 'sparkline-brine-out', dataKey: 'brine_out_condenser', color: '#1565c0' },
+        { id: 'sparkline-radiator-forward', dataKey: 'radiator_forward', color: '#dc143c' },
+        { id: 'sparkline-radiator-return', dataKey: 'radiator_return', color: '#ffd700' }
+    ];
+
+    sparklineConfigs.forEach(config => {
+        const chart = charts[config.id];
+        if (!chart || !temperatureData[config.dataKey] || !temperatureData.timestamps) return;
+
+        const data = temperatureData[config.dataKey];
+        const timestamps = temperatureData.timestamps;
+
+        // Create chart data from current time range selection
+        const chartData = data.map((value, index) => [timestamps[index], value]);
+
+        const option = {
+            grid: {
+                left: 0,
+                right: 0,
+                top: 2,
+                bottom: 2
+            },
+            xAxis: {
+                type: 'time',
+                show: false
+            },
+            yAxis: {
+                type: 'value',
+                show: false
+            },
+            series: [{
+                type: 'line',
+                data: chartData,
+                smooth: true,
+                symbol: 'none',
+                lineStyle: {
+                    color: config.color,
+                    width: 1.5
+                },
+                areaStyle: {
+                    color: {
+                        type: 'linear',
+                        x: 0,
+                        y: 0,
+                        x2: 0,
+                        y2: 1,
+                        colorStops: [
+                            { offset: 0, color: config.color + '40' },
+                            { offset: 1, color: config.color + '05' }
+                        ]
+                    }
+                }
+            }]
+        };
+
+        chart.setOption(option, true);
+    });
 }
 
 // ==================== Chart 1: COP Line Chart ====================
