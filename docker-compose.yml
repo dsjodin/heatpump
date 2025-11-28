@@ -51,8 +51,9 @@ services:
     networks:
       - thermia-net
 
-  # Embedded MQTT Broker (only used with simulator)
-  # Starts automatically when using --profile simulator
+  # Embedded MQTT Broker for Simulator
+  # Starts automatically when using simulator
+  # Binds to port 1883 - only use when testing with simulator
   mosquitto-sim:
     image: eclipse-mosquitto:2.0
     container_name: thermia-mosquitto-sim
@@ -63,12 +64,10 @@ services:
       - ./simulator/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
     networks:
       - thermia-net
-    profiles:
-      - simulator
 
   # Heat Pump Simulator (for testing UI with different manufacturers)
-  # Includes embedded MQTT broker - no external broker needed!
-  # Start with: docker-compose --profile simulator up -d
+  # Enable in config.yaml: simulator.enabled: true
+  # Requires mosquitto-sim to be running
   simulator:
     build:
       context: .
@@ -85,8 +84,6 @@ services:
       - MQTT_BROKER=mosquitto-sim
     networks:
       - thermia-net
-    profiles:
-      - simulator
 
   # Web Dashboard
   dashboard:
