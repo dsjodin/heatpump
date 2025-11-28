@@ -85,8 +85,8 @@ services:
     networks:
       - thermia-net
 
-  # Web Dashboard
-  dashboard:
+  # Web Dashboard (Flask + WebSocket + ECharts)
+  dashboard-websocket:
     build:
       context: .
       dockerfile: dashboard/Dockerfile
