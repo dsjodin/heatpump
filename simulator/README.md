@@ -2,6 +2,8 @@
 
 Realistic metric generator for testing the dashboard UI with different heat pump manufacturers.
 
+**⭐ No external MQTT broker needed!** The simulator includes an embedded MQTT broker that starts automatically.
+
 ## Supported Manufacturers
 
 1. **Thermia** - Uses current metric names (radiator_forward, brine_in_evaporator, etc.)
@@ -10,6 +12,7 @@ Realistic metric generator for testing the dashboard UI with different heat pump
 
 ## Features
 
+- ✅ **Embedded MQTT broker** - No external broker configuration required
 - ✅ Realistic temperature simulation based on physics
 - ✅ Compressor cycling (20-45 min ON, 10-30 min OFF)
 - ✅ Hot water vs heating mode switching
@@ -33,22 +36,41 @@ simulator:
   mode: mqtt             # 'mqtt', 'influxdb', or 'both'
 ```
 
+## How It Works
+
+When you start the simulator with `--profile simulator`:
+
+1. **Embedded MQTT Broker** (`mosquitto-sim`) starts automatically on port 1883
+2. **Simulator** generates realistic metrics and publishes to the embedded broker
+3. **Collector** receives metrics from the embedded broker (just like from a real heat pump)
+4. **Dashboard** displays the simulated data
+
+**No configuration needed!** The simulator and collector automatically use the embedded broker.
+
 ## Running the Simulator
 
-### Option 1: Docker Compose (Recommended)
+### Option 1: Docker Compose (Recommended) - COMPLETELY STANDALONE
 
 ```bash
-# Start with simulator profile
+# 1. Enable simulator in config.yaml
+simulator:
+  enabled: true
+  manufacturer: thermia  # or 'ivt' or 'nibe'
+
+# 2. Start everything with embedded MQTT broker
 docker-compose --profile simulator up -d
 
 # View logs
 docker-compose logs -f simulator
+docker-compose logs -f mosquitto-sim
 
 # Stop simulator
 docker-compose --profile simulator down
 ```
 
-### Option 2: Standalone Python
+**That's it!** No external MQTT broker required. Everything runs in Docker.
+
+### Option 2: Standalone Python (requires external MQTT broker)
 
 ```bash
 cd simulator

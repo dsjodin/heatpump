@@ -4,8 +4,8 @@ brand: thermia
 
 mqtt:
   # MQTT Broker Configuration
-  # For LOCAL broker (included): broker: mosquitto
   # For EXTERNAL broker: broker: 192.168.1.100 (your MQTT broker IP/hostname)
+  # For SIMULATOR mode: Embedded broker included automatically (no config needed)
   broker: 10.1.40.140
   port: 1883
   username: thermia_monitor

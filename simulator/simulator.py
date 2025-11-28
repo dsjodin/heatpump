@@ -80,6 +80,10 @@ class HeatPumpSimulatorRunner:
         """Setup MQTT client"""
         mqtt_config = self.config['mqtt']
 
+        # Allow overriding broker from environment (for Docker)
+        broker = os.getenv('MQTT_BROKER', mqtt_config['broker'])
+        port = int(os.getenv('MQTT_PORT', mqtt_config.get('port', 1883)))
+
         self.mqtt_client = mqtt.Client(
             client_id=mqtt_config.get('client_id', 'heatpump_simulator'),
             clean_session=True
@@ -91,10 +95,10 @@ class HeatPumpSimulatorRunner:
 
         # Connect to broker
         try:
-            logger.info(f"Connecting to MQTT broker at {mqtt_config['broker']}:{mqtt_config['port']}")
+            logger.info(f"Connecting to MQTT broker at {broker}:{port}")
             self.mqtt_client.connect(
-                mqtt_config['broker'],
-                mqtt_config['port'],
+                broker,
+                port,
                 keepalive=60
             )
             self.mqtt_client.loop_start()
