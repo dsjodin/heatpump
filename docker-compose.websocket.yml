@@ -4,42 +4,7 @@
 version: '3.8'
 
 services:
-  # New WebSocket Dashboard (Flask + ECharts)
-  dashboard-websocket:
-    build:
-      context: ./dashboard
-      dockerfile: Dockerfile
-    container_name: heatpump-dashboard-websocket
-    ports:
-      - "8050:8050"
-    environment:
-      - INFLUXDB_URL=http://influxdb:8086
-      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
-      - INFLUXDB_ORG=${INFLUXDB_ORG:-thermia}
-      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-heatpump}
-      - HEATPUMP_BRAND=${HEATPUMP_BRAND:-thermia}
-      - SECRET_KEY=${SECRET_KEY:-heatpump-dashboard-secret-key-change-in-production}
-      - PYTHONUNBUFFERED=1
-    volumes:
-      # Mount shared modules
-      - ./dashboard_dash/data_query.py:/app/data_query.py:ro
-      - ./dashboard_dash/config_colors.py:/app/config_colors.py:ro
-      - ./providers:/app/providers:ro
-      # Mount config
-      - ./config.yaml:/app/config.yaml:ro
-    depends_on:
-      - influxdb
-    restart: unless-stopped
-    networks:
-      - heatpump-network
-    healthcheck:
-      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8050/api/config', timeout=5)"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
-
-  # InfluxDB (if not already running)
+  # InfluxDB Time-Series Database
   influxdb:
     image: influxdb:2.7
     container_name: heatpump-influxdb
@@ -58,6 +23,87 @@ services:
     restart: unless-stopped
     networks:
       - heatpump-network
+
+  # Data Collector Service
+  collector:
+    build:
+      context: .
+      dockerfile: collector/Dockerfile
+    container_name: heatpump-collector
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-thermia}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-heatpump}
+    networks:
+      - heatpump-network
+
+  # Embedded MQTT Broker for Simulator
+  # Starts automatically when using simulator
+  mosquitto-sim:
+    image: eclipse-mosquitto:2.0
+    container_name: heatpump-mosquitto-sim
+    restart: unless-stopped
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./simulator/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+    networks:
+      - heatpump-network
+
+  # Heat Pump Simulator (for testing UI with different manufacturers)
+  # Enable in config.yaml: simulator.enabled: true
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    container_name: heatpump-simulator
+    restart: unless-stopped
+    depends_on:
+      - influxdb
+      - mosquitto-sim
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - CONFIG_PATH=/app/config.yaml
+      - MQTT_BROKER=mosquitto-sim
+    networks:
+      - heatpump-network
+
+  # WebSocket Dashboard (Flask + Socket.IO + ECharts)
+  dashboard-websocket:
+    build:
+      context: .
+      dockerfile: dashboard/Dockerfile
+    container_name: heatpump-dashboard-websocket
+    ports:
+      - "8050:8050"
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=${INFLUXDB_TOKEN}
+      - INFLUXDB_ORG=${INFLUXDB_ORG:-thermia}
+      - INFLUXDB_BUCKET=${INFLUXDB_BUCKET:-heatpump}
+      - HEATPUMP_BRAND=${HEATPUMP_BRAND:-thermia}
+      - SECRET_KEY=${SECRET_KEY:-heatpump-dashboard-secret-key-change-in-production}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+    networks:
+      - heatpump-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8050/api/config', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 networks:
   heatpump-network:
